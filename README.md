@@ -1,1 +1,1 @@
-[![Diagrama de classes](https://github.com/andrefilipe1310/reconnect/tree/main/docs/diagrams/class_driagram.md)]
+[Diagrama](https://github.com/andrefilipe1310/reconnect/tree/main/docs/diagrams/class_driagram.md)
