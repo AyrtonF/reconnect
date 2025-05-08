@@ -3,11 +3,10 @@ erDiagram
 
 USER ||--o{ AUTH_SESSION : maintains
 USER ||--o{ NOTIFICATION : receives
-USER ||--o{ PARTICIPATION : includes
-USER ||--o{ REWARD : sponsors (Company only)
+USER ||--o{ PARTICIPATION : involved_in
 
 STUDENT ||--o{ PARTICIPATION : participates
-STUDENT ||--o{ OPPORTUNITY : joins (via Participation)
+STUDENT ||--o{ OPPORTUNITY : joins
 
 VOLUNTEER ||--o{ OPPORTUNITY : creates
 COMPANY ||--o{ REWARD : offers
@@ -33,16 +32,19 @@ USER {
 }
 
 STUDENT {
+  UUID userId
   String school
   String gradeLevel
   Integer points
 }
 
 VOLUNTEER {
-  String[] skills
+  UUID userId
+  String skills
 }
 
 COMPANY {
+  UUID userId
   String companyName
 }
 
@@ -67,18 +69,22 @@ REWARD {
   String title
   String description
   Integer pointsCost
+  UUID sponsorId
 }
 
 AUTH_SESSION {
   UUID id
+  UUID userId
   String token
   LocalDateTime expiresAt
 }
 
 NOTIFICATION {
   UUID id
+  UUID userId
   String message
   Boolean read
   LocalDateTime createdAt
 }
+
 ```
