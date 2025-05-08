@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
 
 %% Herança
@@ -92,3 +93,5 @@ class AuthSession {
   String token
   LocalDateTime expiresAt
 }
+
+```
