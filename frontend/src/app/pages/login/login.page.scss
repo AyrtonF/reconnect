@@ -1,0 +1,82 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 2em;
+    height: 100%;
+  margin-top: 3em;
+ 
+
+  
+}
+
+.back-button {
+  align-self: flex-start;
+  margin-bottom: 1em;
+  --padding-start: 0;
+}
+
+.title {
+  text-align: left;
+
+  h2 {
+    font-weight: bold;
+    color: #2e7d63;
+    margin: 0;
+  }
+
+  .subtitle {
+    margin-top: 0.3em;
+  }
+
+  margin-bottom: 2em;
+}
+
+.input {
+  margin-bottom: 1.5em;
+  background: #f6f7f9;
+  border-radius: 8px;
+  padding: 0.8em;
+}
+
+.forgot-password {
+  text-align: right;
+  font-size: 0.9em;
+  margin-bottom: 1.5em;
+  color: #555;
+  cursor: pointer;
+}
+
+.login-button {
+  --background: #2e7d63;
+  --color: #fff;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-bottom: 2em;
+}
+
+.signup {
+  text-align: center;
+  font-size: 0.95em;
+
+  a {
+    color: #2e7d63;
+    font-weight: 600;
+    margin-left: 0.3em;
+    cursor: pointer;
+  }
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+  .container {
+    padding: 4em;
+  }
+
+  .title h2 {
+    font-size: 2em;
+  }
+
+  .login-button {
+    font-size: 1.1em;
+  }
+}

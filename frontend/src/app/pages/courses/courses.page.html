@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="green-text">Educação</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="courses-page">
+  <div class="container">
+    <ion-searchbar
+      placeholder="Procurar cursos"
+      [(ngModel)]="searchTerm"
+      class="custom-searchbar"
+    ></ion-searchbar>
+
+    <div class="course-card" *ngFor="let course of filteredCourses()">
+      <img *ngIf="course.image" [src]="course.image" class="course-image" />
+
+      <div class="course-content">
+        <h2 class="course-title">{{ course.title }}</h2>
+        <p class="course-description">{{ course.description }}</p>
+        <ion-button size="small">Iniciar curso</ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

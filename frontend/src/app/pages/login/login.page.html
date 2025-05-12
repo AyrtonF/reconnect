@@ -1,0 +1,57 @@
+<ion-header>
+   <ion-button fill="clear" class="back-button" (click)="goBack()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </ion-button>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+  
+
+    <div class="title">
+      <h2>Vamos nessa?</h2>
+      <h2 class="subtitle">Um dia leve te espera.</h2>
+    </div>
+
+    <form (submit)="login()">
+      <label>Email</label>
+      <ion-input
+        type="email"
+        placeholder="Digite seu email"
+        [(ngModel)]="email"
+        name="email"
+        required
+        class="input"
+      ></ion-input>
+
+      <label>Senha</label>
+      <ion-input
+        [type]="showPassword ? 'text' : 'password'"
+        placeholder="Digite sua senha"
+        [(ngModel)]="password"
+        name="password"
+        required
+        class="input"
+      >
+        <ion-icon
+          name="{{ showPassword ? 'eye-off-outline' : 'eye-outline' }}"
+          slot="end"
+          (click)="togglePassword()"
+        ></ion-icon>
+      </ion-input>
+
+      <div class="forgot-password" (click)="forgotPassword()">
+        Esqueceu a senha?
+      </div>
+
+      <ion-button expand="block" class="login-button" type="submit">
+        Entrar
+      </ion-button>
+    </form>
+
+    <div class="signup">
+      Não possui conta?
+      <a (click)="goToSignUp()">Cadastre-se</a>
+    </div>
+  </div>
+</ion-content>

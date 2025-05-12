@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/challenge"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="green-text">{{ challenge.title }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="challenge-details-page">
+  <div class="container">
+    <ion-img [src]="challenge.image" class="challenge-image"></ion-img>
+
+    <div class="description-section">
+      <p class="label"><strong>Atividade coletiva:</strong></p>
+      <p class="description">{{ challenge.description }}</p>
+    </div>
+
+    <div class="participants-section">
+      <p class="label"><strong>Participantes</strong></p>
+      <div class="avatars-row">
+        <ion-avatar *ngFor="let participant of challenge.participants">
+          <img [src]="participant.avatar" />
+        </ion-avatar>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <ion-button expand="block">
+        <ion-icon name="attach-outline" slot="start"></ion-icon>
+        Registrar atividade
+      </ion-button>
+      <ion-button expand="block">
+        Concluir desafio
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

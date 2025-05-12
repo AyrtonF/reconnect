@@ -1,0 +1,71 @@
+<ion-content class="home-page">
+
+  <!-- Topo com logo e menu -->
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <ion-title>
+        <img src="../../../../assets/images/logo.png" alt="Logo" class="logo" />
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="container">
+    <h2>Bem-vindo, <span class="green-text">{{ username }}</span>!</h2>
+
+    <!-- Blocos de ações -->
+    <div class="grid-buttons">
+      <ion-card class="action-card">
+        <ion-icon name="ribbon-outline"></ion-icon>
+        <p>{{ points }}<br /><span>Pontos</span></p>
+      </ion-card>
+
+      <ion-card class="action-card">
+        <ion-icon name="walk-outline"></ion-icon>
+        <p>Desafios</p>
+      </ion-card>
+
+      <ion-card class="action-card">
+        <ion-icon name="people-outline"></ion-icon>
+        <p>Família</p>
+      </ion-card>
+
+      <ion-card class="action-card">
+        <ion-icon name="book-outline"></ion-icon>
+        <p>Cursos</p>
+      </ion-card>
+    </div>
+
+    <!-- Cursos em andamento -->
+    <h3 class="section-title">Cursos em Andamento</h3>
+
+    <ion-card class="course-card">
+      <img src="../../../../assets/images/course-image.png" alt="Curso" />
+      <ion-card-header>
+        <ion-card-title class="orange-text">
+          O Impacto do Uso Excessivo da Internet
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="description">
+          Entenda os sinais de dependência digital em crianças e adolescentes e aprenda estratégias para promover um uso saudável da tecnologia.
+        </p>
+
+        <div class="progress-section">
+          <div class="progress-text">
+            <span>Progresso: {{ progress }}%</span>
+            <span>{{ pointsAwarded }} pts</span>
+          </div>
+          <ion-progress-bar value="0.05" color="warning"></ion-progress-bar>
+        </div>
+
+        <ion-button expand="block" color="warning" class="access-button">
+          Acessar curso
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-button fill="clear" class="back-button">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </ion-button>
+</ion-header>
+
+<ion-content class="challenge-page">
+
+  <div class="container">
+    <p class="points">{{ userPoints }} Pontos</p>
+
+    <ion-card class="challenge-card" *ngFor="let challenge of challenges">
+      <ion-item lines="none">
+        <ion-thumbnail slot="start">
+          <img [src]="challenge.image" />
+        </ion-thumbnail>
+        <ion-label>
+          <h2 class="title">{{ challenge.title }}</h2>
+          <p class="description">{{ challenge.description }}</p>
+        </ion-label>
+        <div class="points-tag">{{ challenge.points }} pts</div>
+      </ion-item>
+
+      <ion-button expand="block" [ngClass]="challenge.status+'-button'">
+        {{ challenge.buttonText }}
+      </ion-button>
+    </ion-card>
+  </div>
+
+</ion-content>

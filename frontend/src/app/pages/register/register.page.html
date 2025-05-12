@@ -1,0 +1,32 @@
+
+
+    <ion-header>
+   <ion-button fill="clear" class="back-button">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </ion-button>
+</ion-header>
+
+<ion-content class="register-page">
+
+  <div class="content">
+    <h1>Menos notificações, mais momentos.<br />Vamos começar?</h1>
+
+    <ion-label class="input-label">Nome</ion-label>
+    <ion-input placeholder="Nome" [(ngModel)]="name" type="text"></ion-input>
+
+    <ion-label class="input-label">Email</ion-label>
+    <ion-input placeholder="Email" [(ngModel)]="email" type="email"></ion-input>
+
+    <ion-label class="input-label">Telefone</ion-label>
+    <ion-input placeholder="Telefone" [(ngModel)]="phone" type="tel"></ion-input>
+
+    <ion-label class="input-label">Senha</ion-label>
+    <ion-input placeholder="Senha" [(ngModel)]="password" type="password"></ion-input>
+
+    <ion-button expand="block" class="register-button" (click)="register()">Cadastrar</ion-button>
+
+    <div class="footer-text">
+      Já possui conta? <a routerLink="/login">Entrar</a>
+    </div>
+  </div>
+</ion-content>

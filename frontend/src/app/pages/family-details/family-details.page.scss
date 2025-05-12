@@ -1,0 +1,75 @@
+.family-details-page {
+  .container {
+    padding: 16px;
+  }
+
+  .green-text {
+    color: #2e7d63;
+    font-weight: 600;
+  }
+
+  .icon-end {
+    font-size: 24px;
+    color: #2e7d63;
+  }
+
+  .post-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    ion-avatar {
+      width: 40px;
+      height: 40px;
+    }
+
+    .name-time {
+      h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      small {
+        font-size: 12px;
+        color: #666;
+      }
+    }
+  }
+
+  .caption {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .post-image {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
+
+  .likes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #2e7d63;
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+  }
+}
