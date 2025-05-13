@@ -1,97 +1,86 @@
 ```mermaid
 classDiagram
+  class User {
+    +int id
+    +string name
+    +string email
+    +string password
+    +string role
+    +string phone
+    +int score
+    +string avatar
+    +int[] coursesIds
+    +int[] familyIds
+    +int[] challengesCompletedIds
+    +int[] pendingChallengesIds
+    +string[] imagesOfChallenge
+    +int[] couponsIds
+    +int[] posts
+  }
+  class Challenge {
+    +int id
+    +string title
+    +string description
+    +string status
+    +int[] participantsIds
+    +string image
+    +int checks
+    +int score
+    +string type
+    +int familyId
+  }
+  class Course {
+    +int id
+    +string title
+    +string description
+    +int workload
+    +int score
+    +int progress
+    +string[] videos
+    +int[] textMaterialIds
+  }
+  class TextMaterial {
+    +int id
+    +string title
+    +string text
+  }
+  class Family {
+    +int id
+    +string name
+    +int[] membersIds
+    +int[] postsIds
+    +int[] challengesIds
+  }
+  class Post {
+    +int id
+    +int userId
+    +int familyId
+    +string caption
+    +string image
+    +int likes
+    +string timestamp
+  }
+  class Coupon {
+    +int id
+    +string title
+    +string description
+    +int scoreRequired
+    +string validUntil
+  }
 
-%% Herança
-User <|-- Student
-User <|-- Volunteer
-User <|-- Company
-
-%% Relacionamentos
-Company "1" --> "many" Reward : oferece >
-Volunteer "1" --> "many" Opportunity : cria >
-Opportunity "many" --> "many" Student : participantes
-Student "1" --> "many" Participation : participa >
-Opportunity "1" --> "many" Participation
-Reward "1" --> "1" Company : patrocinado por >
-Opportunity "1" --> "1" Category
-User "1" --> "many" Notification : recebe >
-User "1" --> "many" AuthSession : mantém >
-
-%% Classes principais
-class User {
-  UUID id
-  String name
-  String email
-  String password
-  UserType type
-  String profileImageUrl
-  LocalDateTime createdAt
-}
-
-class Student {
-  String school
-  String gradeLevel
-  Integer points
-}
-
-class Volunteer {
-  List<String> skills
-}
-
-class Company {
-  String companyName
-  List<Reward> rewardsOffered
-}
-
-class Opportunity {
-  UUID id
-  String title
-  String description
-  String location
-  Category category
-  LocalDateTime dateTime
-  Double durationHours
-  Integer availableSlots
-  Volunteer createdBy
-  List<Student> participants
-}
-
-class Category {
-  UUID id
-  String name
-  String iconUrl
-}
-
-class Reward {
-  UUID id
-  String title
-  String description
-  Integer pointsCost
-  Company sponsor
-}
-
-class Participation {
-  UUID id
-  Student student
-  Opportunity opportunity
-  ParticipationStatus status
-  String feedback
-  String proofImageUrl
-}
-
-class Notification {
-  UUID id
-  User recipient
-  String message
-  Boolean read
-  LocalDateTime createdAt
-}
-
-class AuthSession {
-  UUID id
-  User user
-  String token
-  LocalDateTime expiresAt
-}
+  User "1" -- "*" Course : coursesIds
+  User "1" -- "*" Family : familyIds
+  User "1" -- "*" Challenge : challengesCompletedIds
+  User "1" -- "*" Challenge : pendingChallengesIds
+  User "1" -- "*" Coupon : couponsIds
+  User "1" -- "*" Post : posts
+  Challenge "1" -- "*" User : participantsIds
+  Challenge "1" -- "1" Family : familyId
+  Course "1" -- "*" TextMaterial : textMaterialIds
+  Family "1" -- "*" User : membersIds
+  Family "1" -- "*" Post : postsIds
+  Family "1" -- "*" Challenge : challengesIds
+  Post "1" -- "1" User : userId
+  Post "1" -- "1" Family : familyId
 
 ```
