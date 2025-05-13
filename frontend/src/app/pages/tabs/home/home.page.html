@@ -22,17 +22,17 @@
         <p>{{ points }}<br /><span>Pontos</span></p>
       </ion-card>
 
-      <ion-card class="action-card">
+      <ion-card class="action-card" (click)="navigateToPage('challenge')">
         <ion-icon name="walk-outline"></ion-icon>
         <p>Desafios</p>
       </ion-card>
 
-      <ion-card class="action-card">
+      <ion-card class="action-card" (click)="navigateToPage('family-details')">
         <ion-icon name="people-outline"></ion-icon>
         <p>Família</p>
       </ion-card>
 
-      <ion-card class="action-card">
+      <ion-card class="action-card" (click)="navigateToPage('courses')">
         <ion-icon name="book-outline"></ion-icon>
         <p>Cursos</p>
       </ion-card>
