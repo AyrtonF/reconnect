@@ -1,0 +1,75 @@
+{
+  "user": {
+    "id": 1,
+    "name": "André",
+    "email": "andre@gmail.com",
+    "password": "12345",
+    "role": "user",
+    "phone": "+55 (81)99999-9999",
+    "score": 800,
+    "avatar": "assets/users/andre.jpg",
+    "coursesIds": [1, 2, 3],
+    "familyIds": [1],
+    "challengesCompletedIds": [1, 3],
+    "pendingChallengesIds": [2, 4, 5],
+    "imagesOfChallenge": ["assets/uploads/desafio1.jpg", "assets/uploads/desafio2.jpg"],
+    "couponsIds": [1, 2, 3],
+    "posts": [1, 2]
+  },
+
+  "challenge": {
+    "id": 1,
+    "title": "Fazer uma Caminhada",
+    "description": "Caminhada de 5km com familiares e amigos.",
+    "status": "completed",
+    "participantsIds": [1, 2, 3, 4],
+    "image": "assets/challenges/walk.jpg",
+    "checks": 4,
+    "score": 100,
+    "type": "physical",
+    "familyId": 1
+  },
+
+  "course": {
+    "id": 1,
+    "title": "Os riscos da exposição à internet na adolescência",
+    "description": "Aprenda a identificar e prevenir os principais riscos da exposição de crianças e adolescentes na internet.",
+    "workload": 90,
+    "score": 150,
+    "progress": 80,
+    "videos": ["assets/videos/aula1.mp4", "assets/videos/aula2.mp4"],
+    "textMaterialIds": [1, 2]
+  },
+
+  "textMaterial": {
+    "id": 1,
+    "title": "Atenção aos riscos digitais",
+    "text": "Entenda os principais riscos da exposição infantil e estratégias para mitigar esses perigos..."
+  },
+
+  "family": {
+    "id": 1,
+    "name": "Familia Feliz",
+    "membersIds": [1, 2, 3],
+    "postsIds": [1, 2],
+    "challengesIds": [1, 2]
+  },
+
+  "post": {
+    "id": 1,
+    "userId": 1,
+    "familyId": 1,
+    "caption": "Corrida no parque, nem pensa só vai!!!",
+    "image": "assets/family/marcos-corrida.jpg",
+    "likes": 10,
+    "timestamp": "2025-05-13T08:39:00Z"
+  },
+
+  "coupon": {
+    "id": 1,
+    "title": "Desconto 10% no cinema",
+    "description": "Utilize esse cupom para ganhar desconto em sessões de cinema em família.",
+    "scoreRequired": 100,
+    "validUntil": "2025-12-31"
+  }
+}
