@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="title">Parceiros e<br />Descontos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-searchbar 
+    [(ngModel)]="searchTerm"
+    (ionInput)="filterPartners()"
+    placeholder="Procurar parceiros"
+    showClearButton="always"
+    class="searchbar">
+  </ion-searchbar>
+
+  <!-- Filtros -->
+  <div class="filter-buttons">
+    <ion-button
+      *ngFor="let category of categories"
+      size="small"
+      fill="{{ selectedCategory === category ? 'solid' : 'outline' }}"
+      (click)="filterByCategory(category)">
+      {{ category }}
+    </ion-button>
+  </div>
+
+  <!-- Lista de parceiros -->
+  <ion-list>
+    <ion-item *ngFor="let partner of filteredPartners" lines="none">
+      <ion-avatar slot="start">
+        <img [src]="partner.logo" alt="Logo {{partner.name}}" />
+      </ion-avatar>
+      <ion-label>
+        <h2 class="partner-name">{{ partner.name }}</h2>
+        <p class="partner-category">{{ partner.category }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

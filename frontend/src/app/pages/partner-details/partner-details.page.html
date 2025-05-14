@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="partner-banner">
+    <img [src]="partner.banner" alt="{{ partner.name }} banner" />
+  </div>
+
+  <div class="partner-info">
+    <h2 class="partner-name">{{ partner.name }}</h2>
+    <p class="partner-description">
+      {{ showFullText ? partner.description : shortDescription }}
+      <span *ngIf="!showFullText" (click)="showFullText = true" class="read-more">Mais</span>
+    </p>
+  </div>
+
+  <div class="coupon-title">Cupons e Descontos</div>
+
+  <div class="coupons">
+    <div *ngFor="let coupon of partner.coupons" class="coupon-card">
+      <div class="icon">
+        <ion-icon name="ticket-outline"></ion-icon>
+      </div>
+      <div class="coupon-info">
+        <div class="coupon-text">{{ coupon.title }}</div>
+        <div class="coupon-sub">Válido nas salas padrões</div>
+      </div>
+      <ion-button
+        [color]="coupon.used ? 'medium' : ''"
+        [disabled]="coupon.used"
+        size="small"
+        shape="round"
+      >
+        {{ coupon.used ? 'Usado' : 'Usar' }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

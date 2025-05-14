@@ -1,0 +1,76 @@
+ion-title.title {
+  text-align: center;
+  font-weight: bold;
+  color: #2e7d32; // verde escuro
+  font-size: 1.2rem;
+  line-height: 1.5rem;
+  margin: 1em 0;
+}
+
+.course-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.description {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+ion-item {
+  --border-color: #eee;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  --padding-start: 12px;
+}
+
+ion-icon {
+  font-size: 24px;
+}
+
+@media (min-width: 768px) {
+  ion-content {
+    max-width: 700px;
+    margin: auto;
+  }
+
+  .description {
+    font-size: 1.1rem;
+  }
+
+  ion-title.title {
+    font-size: 1.4rem;
+    padding: 4000px 0;
+  }
+}
+.progress-container {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.progress-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+ion-progress-bar {
+  height: 12px;
+  border-radius: 6px;
+  --progress-background: #e0e0e0;
+  --progress-color: #4caf50;
+}
+
+.progress-percent {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 0.9rem;
+  color: #333;
+  margin-top: -4px;
+}

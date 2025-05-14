@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/courses"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="title">O Impacto do Uso<br />Excessivo Da Internet</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-img [src]="course.image" class="course-image"></ion-img>
+
+  <p class="description">
+    <strong>Descrição:</strong> {{ course.description }}
+  </p>
+
+  <!-- BARRA DE PROGRESSO -->
+  <div class="progress-container">
+    <label class="progress-label">Progresso do Curso</label>
+    <ion-progress-bar [value]="progress" color="success"></ion-progress-bar>
+    <span class="progress-percent">{{ (progress * 100) | number:'1.0-0' }}%</span>
+  </div>
+
+  <ion-list>
+    <ion-item *ngFor="let video of course.videos; let i = index">
+      <ion-icon name="play-circle-outline" slot="start" color="warning"></ion-icon>
+      <ion-label>{{ video.title }}</ion-label>
+      <ion-checkbox
+        slot="end"
+        [checked]="video.completed"
+        (ionChange)="toggleComplete(i)">
+      </ion-checkbox>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
