@@ -2,6 +2,7 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/challenge"></ion-back-button>
+      <ion-menu-button color="primary"></ion-menu-button>
     </ion-buttons>
     <ion-title class="green-text">{{ challenge?.title }}</ion-title>
   </ion-toolbar>
@@ -19,7 +20,8 @@
       <p class="label"><strong>Participantes</strong></p>
       <div class="avatars-row">
         <ion-avatar *ngFor="let participant of participants">
-          <img [src]="participant.avatar != undefined ? participant.avatar : '../../../assets/images/default-user.png' " alt="{{ participant.name }}" />
+          <img [src]="participant.avatar != undefined ? participant.avatar : '../../../assets/images/default-user.png' "
+            alt="{{ participant.name }}" />
         </ion-avatar>
       </div>
     </div>

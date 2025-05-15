@@ -1,0 +1,22 @@
+<div class="side-menu-container">
+  <div class="menu-header">
+    <h2>Menu</h2>
+    <ion-button fill="clear" (click)="onClose()">
+      <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  <div class="menu-items">
+    <ion-list lines="none">
+      <ion-item *ngFor="let item of menuItems" [routerLink]="item.route" (click)="onClose()">
+        <ion-icon slot="start" [name]="item.icon"></ion-icon>
+        <ion-label>{{ item.label }}</ion-label>
+      </ion-item>
+
+      <ion-item button (click)="logout()" class="logout-item">
+        <ion-icon slot="start" name="log-out-outline" color="danger"></ion-icon>
+        <ion-label color="danger">Sair</ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</div>

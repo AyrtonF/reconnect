@@ -2,6 +2,7 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
+      <ion-menu-button color="primary"></ion-menu-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -30,12 +31,7 @@
         <div class="coupon-text">{{ coupon.title }}</div>
         <div class="coupon-sub">Válido nas salas padrões</div>
       </div>
-      <ion-button
-        [color]="coupon.used ? 'medium' : ''"
-        [disabled]="coupon.used"
-        size="small"
-        shape="round"
-      >
+      <ion-button [color]="coupon.used ? 'medium' : ''" [disabled]="coupon.used" size="small" shape="round">
         {{ coupon.used ? 'Usado' : 'Usar' }}
       </ion-button>
     </div>

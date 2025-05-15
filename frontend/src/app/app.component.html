@@ -1,3 +1,8 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <!-- Menu será renderizado apenas quando showMenu for true -->
+  <ion-menu side="start" contentId="main-content" type="overlay" *ngIf="showMenu">
+    <app-side-menu (closeMenu)="closeMenu()"></app-side-menu>
+  </ion-menu>
+
+  <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>
