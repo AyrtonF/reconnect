@@ -3,24 +3,23 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/challenge"></ion-back-button>
     </ion-buttons>
-    <ion-title class="green-text">{{ challenge.title }}</ion-title>
+    <ion-title class="green-text">{{ challenge?.title }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="challenge-details-page">
-  <div class="container">
-    <ion-img [src]="challenge.image" class="challenge-image"></ion-img>
+  <div class="container" *ngIf="challenge">
+    <ion-img [src]="challenge.imageBanner" class="challenge-image"></ion-img>
 
     <div class="description-section">
       <p class="label"><strong>Atividade coletiva:</strong></p>
       <p class="description">{{ challenge.description }}</p>
     </div>
-
     <div class="participants-section">
       <p class="label"><strong>Participantes</strong></p>
       <div class="avatars-row">
-        <ion-avatar *ngFor="let participant of challenge.participants">
-          <img [src]="participant.avatar" />
+        <ion-avatar *ngFor="let participant of participants">
+          <img [src]="participant.avatar != undefined ? participant.avatar : '../../../assets/images/default-user.png' " alt="{{ participant.name }}" />
         </ion-avatar>
       </div>
     </div>
@@ -34,5 +33,9 @@
         Concluir desafio
       </ion-button>
     </div>
+  </div>
+
+  <div class="container" *ngIf="!challenge">
+    <p>Carregando detalhes do desafio...</p>
   </div>
 </ion-content>

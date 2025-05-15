@@ -15,7 +15,7 @@ export class UserService {
       role: 'user',
       phone: '+55 (81)99999-9999',
       score: 800,
-      avatar: 'assets/users/andre.jpg',
+      avatar: '../../../assets/images/marcos.png',
       coursesIds: [1, 2, 3],
       familyIds: [1],
       challengesCompletedIds: [1, 3],

@@ -1,28 +1,103 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title class="green-text">Educação</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Meus Cursos</ion-title>
+      <ion-buttons slot="end">
+        <ion-avatar>
+          <img [src]="userAvatar" alt="User Avatar">
+        </ion-avatar>
+      </ion-buttons>
+    </ion-toolbar>
+    
+    <ion-toolbar>
+      <ion-searchbar
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar cursos"
+        animated>
+      </ion-searchbar>
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content class="courses-page">
-  <div class="container">
-    <ion-searchbar
-      placeholder="Procurar cursos"
-      [(ngModel)]="searchTerm"
-      class="custom-searchbar"
-    ></ion-searchbar>
+  <!-- Estatísticas do Usuário -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Seu Progresso</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <div class="stat-item">
+              <h3>{{userStats.totalCourses}}</h3>
+              <p>Cursos</p>
+            </div>
+          </ion-col>
+          <ion-col>
+            <div class="stat-item">
+              <h3>{{userStats.completedCourses}}</h3>
+              <p>Concluídos</p>
+            </div>
+          </ion-col>
+          <ion-col>
+            <div class="stat-item">
+              <h3>{{userStats.totalPoints}}</h3>
+              <p>Pontos</p>
+            </div>
+          </ion-col>
+          <ion-col>
+            <div class="stat-item">
+              <h3>{{userStats.totalAchievements}}</h3>
+              <p>Conquistas</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 
-    <div class="course-card" *ngFor="let course of filteredCourses()">
-      <img *ngIf="course.image" [src]="course.image" class="course-image" />
+  <!-- Cursos em Progresso -->
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Continue Aprendendo</ion-label>
+    </ion-list-header>
 
-      <div class="course-content">
-        <h2 class="course-title">{{ course.title }}</h2>
-        <p class="course-description">{{ course.description }}</p>
-        <ion-button size="small">Iniciar curso</ion-button>
-      </div>
-    </div>
-  </div>
+    <ion-item *ngFor="let course of inProgressCourses$ | async">
+      <ion-thumbnail slot="start">
+        <img [src]="course.thumbnail" [alt]="course.title">
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{course.title}}</h2>
+        <p>{{course.description}}</p>
+        <ion-progress-bar
+          [value]="course.progress.percentageCompleted / 100"
+          [color]="getProgressColor(course.progress.percentageCompleted)">
+        </ion-progress-bar>
+        <p class="progress-text">
+          {{course.progress.percentageCompleted}}% concluído
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Cursos Disponíveis -->
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Cursos Disponíveis</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let course of availableCourses$ | async">
+      <ion-thumbnail slot="start">
+        <img [src]="course.thumbnail" [alt]="course.title">
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{course.title}}</h2>
+        <p>{{course.description}}</p>
+        <ion-badge color="primary">{{course.level}}</ion-badge>
+        <ion-badge color="secondary">{{formatDuration(course.workload)}}</ion-badge>
+      </ion-label>
+      <ion-button slot="end" (click)="enrollInCourse(course.id)">
+        Matricular
+      </ion-button>
+    </ion-item>
+  </ion-list>
 </ion-content>

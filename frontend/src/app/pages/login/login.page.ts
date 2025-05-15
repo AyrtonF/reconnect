@@ -30,7 +30,7 @@ export class LoginPage {
         console.log('Login bem-sucedido:', response);
         localStorage.setItem('authToken', response.token);
         localStorage.setItem('userRole', response.role);
-        this.navCtrl.navigateForward('/home'); 
+        this.navCtrl.navigateRoot('/home'); 
       },
       error: async (error) => {
         console.error('Erro no login:', error);

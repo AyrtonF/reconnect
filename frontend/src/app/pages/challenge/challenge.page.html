@@ -1,30 +1,36 @@
 <ion-header>
-  <ion-button fill="clear" class="back-button">
+  <ion-toolbar>
+  
+    <ion-button fill="clear" class="back-button" (click)="goHome()">
       <ion-icon name="chevron-back-outline"></ion-icon>
     </ion-button>
+    <ion-title>Desafios</ion-title>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="challenge-page">
-
   <div class="container">
     <p class="points">{{ userPoints }} Pontos</p>
 
-    <ion-card class="challenge-card" *ngFor="let challenge of challenges">
+    <ion-card class="challenge-card" (click)="goChallengeDetails(challenge.id)" *ngFor="let challenge of challenges">
       <ion-item lines="none">
         <ion-thumbnail slot="start">
-          <img [src]="challenge.image" />
+          <img [src]="challenge.image" alt="{{ challenge.title }}" />
         </ion-thumbnail>
         <ion-label>
           <h2 class="title">{{ challenge.title }}</h2>
           <p class="description">{{ challenge.description }}</p>
         </ion-label>
-        <div class="points-tag">{{ challenge.points }} pts</div>
+        <div class="points-tag">{{ challenge.score }} pts</div>
       </ion-item>
 
-      <ion-button expand="block" [ngClass]="challenge.status+'-button'">
-        {{ challenge.buttonText }}
+      <ion-button
+        expand="block"
+        [ngClass]="challenge.status + '-button'"
+        (click)="challenge.status === 'participate' ? participateChallenge(challenge.id) : seeMoreChallenge(challenge.id)"
+      >
+        {{ getButtonText(challenge) }}
       </ion-button>
     </ion-card>
   </div>
-
 </ion-content>
