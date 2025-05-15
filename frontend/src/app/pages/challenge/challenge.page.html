@@ -19,6 +19,7 @@
 <ion-content class="challenge-page">
   <div class="container">
     <p class="points">{{ userPoints }} Pontos</p>
+
 @for (challenge of challenges; track challenge.id) {
     <ion-card class="challenge-card" (click)="goChallengeDetails(challenge.id)">
       <ion-item lines="none">

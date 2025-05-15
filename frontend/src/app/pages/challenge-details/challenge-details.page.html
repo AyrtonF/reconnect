@@ -1,7 +1,9 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/challenge"></ion-back-button>
+      <ion-button fill="clear" class="back-button" (click)="goChallenge()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title class="green-text">{{ challenge?.title}}</ion-title>
 

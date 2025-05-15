@@ -5,6 +5,7 @@ import { UserService } from '../../services/user.service';
 import { Challenge, User } from '../../models/types';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-challenge-details',
@@ -19,7 +20,8 @@ export class ChallengeDetailsPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private challengeService: ChallengeService,
-    private userService: UserService
+    private userService: UserService,
+    private navCtrl: NavController
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +50,10 @@ export class ChallengeDetailsPage implements OnInit {
         });
       });
     }
+  }
+
+  goChallenge() {
+    this.navCtrl.navigateRoot('/challenge');
   }
 
   // Método para participar do desafio (mockado)

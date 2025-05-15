@@ -3,6 +3,7 @@ import { CourseService } from 'src/app/services/course.service';
 import { Course } from 'src/app/models/types';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-courses',
@@ -24,7 +25,7 @@ export class CoursesPage implements OnInit {
     totalPoints: 0
   };
 
-  constructor(private courseService: CourseService) {
+  constructor(private courseService: CourseService, private navCtrl: NavController) {
     this.courses$ = this.courseService.getAllCourses();
     this.updateUserStats();
   }
@@ -32,6 +33,10 @@ export class CoursesPage implements OnInit {
   ngOnInit() {
     // Inicializar dados do usuário e cursos
     this.loadUserData();
+  }
+
+  goHome() {
+    this.navCtrl.navigateRoot('/home');
   }
 
   filteredCourses(): Observable<Course[]> {

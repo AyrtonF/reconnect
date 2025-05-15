@@ -1,25 +1,20 @@
 <ion-content>
   <ion-header>
     <ion-toolbar>
-       <ion-buttons slot="start">
+      <ion-buttons slot="start">
+        <ion-button fill="clear" class="back-button" (click)="goHome()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title class="green-text">Educação</ion-title>
+      <ion-buttons slot="end">
         <ion-menu-button color="primary"></ion-menu-button>
       </ion-buttons>
-      <ion-title>Meus Cursos</ion-title>
-      <ion-buttons slot="end">
-        <ion-avatar>
-          <img [src]="userAvatar" alt="User Avatar">
-        </ion-avatar>
-      </ion-buttons>
-    </ion-toolbar>
-    
-    <ion-toolbar>
-      <ion-searchbar
-        [(ngModel)]="searchTerm"
-        placeholder="Buscar cursos"
-        animated>
-      </ion-searchbar>
     </ion-toolbar>
   </ion-header>
+
+  <ion-searchbar [(ngModel)]="searchTerm" placeholder="Buscar cursos" animated class="searchBar">
+  </ion-searchbar>
 
   <!-- Estatísticas do Usuário -->
   <ion-card>
@@ -66,14 +61,15 @@
 
     <ion-item *ngFor="let course of inProgressCourses$ | async">
       <ion-thumbnail slot="start">
-        <img [src]="course.thumbnail" [alt]="course.title">
+        <img [src]="course.thumbnail" [alt]="course.title" />
       </ion-thumbnail>
       <ion-label>
         <h2>{{course.title}}</h2>
         <p>{{course.description}}</p>
         <ion-progress-bar
           [value]="course.progress.percentageCompleted / 100"
-          [color]="getProgressColor(course.progress.percentageCompleted)">
+          [color]="getProgressColor(course.progress.percentageCompleted)"
+        >
         </ion-progress-bar>
         <p class="progress-text">
           {{course.progress.percentageCompleted}}% concluído
@@ -90,13 +86,15 @@
 
     <ion-item *ngFor="let course of availableCourses$ | async">
       <ion-thumbnail slot="start">
-        <img [src]="course.thumbnail" [alt]="course.title">
+        <img [src]="course.thumbnail" [alt]="course.title" />
       </ion-thumbnail>
       <ion-label>
         <h2>{{course.title}}</h2>
         <p>{{course.description}}</p>
         <ion-badge color="primary">{{course.level}}</ion-badge>
-        <ion-badge color="secondary">{{formatDuration(course.workload)}}</ion-badge>
+        <ion-badge color="secondary"
+          >{{formatDuration(course.workload)}}</ion-badge
+        >
       </ion-label>
       <ion-button slot="end" (click)="enrollInCourse(course.id)">
         Matricular
