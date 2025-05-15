@@ -1,20 +1,26 @@
 <ion-header>
   <ion-toolbar>
-     <ion-buttons slot="start">
-        <ion-menu-button color="primary"></ion-menu-button>
-      </ion-buttons>
-    <ion-button fill="clear" class="back-button" (click)="goHome()">
-      <ion-icon name="chevron-back-outline"></ion-icon>
-    </ion-button>
-    <ion-title>Desafios</ion-title>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="back-button" (click)="goHome()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="title-page">Desafios</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-menu-button side="end" color="primary"></ion-menu-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
+
 
 <ion-content class="challenge-page">
   <div class="container">
     <p class="points">{{ userPoints }} Pontos</p>
-
-    <ion-card class="challenge-card" (click)="goChallengeDetails(challenge.id)" *ngFor="let challenge of challenges">
+@for (challenge of challenges; track challenge.id) {
+    <ion-card class="challenge-card" (click)="goChallengeDetails(challenge.id)">
       <ion-item lines="none">
         <ion-thumbnail slot="start">
           <img [src]="challenge.image" alt="{{ challenge.title }}" />
@@ -23,9 +29,9 @@
           <h2 class="title">{{ challenge.title }}</h2>
           <p class="description">{{ challenge.description }}</p>
         </ion-label>
-        <div class="points-tag">{{ challenge.score }} pts</div>
+        
       </ion-item>
-
+<div class="points-tag">{{ challenge.score }} pts</div>
       <ion-button
         expand="block"
         [ngClass]="challenge.status + '-button'"
@@ -34,5 +40,6 @@
         {{ getButtonText(challenge) }}
       </ion-button>
     </ion-card>
+  }
   </div>
 </ion-content>

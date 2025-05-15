@@ -1,18 +1,21 @@
 .container {
   display: flex;
   flex-direction: column;
-  padding: 2em;
-    height: 100%;
+  padding: 1em;
+  height: 100%;
   margin-top: 3em;
- 
-
   
 }
 
 .back-button {
   align-self: flex-start;
-  margin-bottom: 1em;
+  margin-left: 1rem;
+  margin-bottom: 0.5em;
   --padding-start: 0;
+
+  & ion-icon{
+    font-size: 1.5rem;
+  }
 }
 
 .title {
@@ -31,11 +34,15 @@
   margin-bottom: 2em;
 }
 
+
 .input {
   margin-bottom: 1.5em;
+  margin-top: 0.5rem;
   background: #f6f7f9;
   border-radius: 8px;
   padding: 0.8em;
+  --padding-start:10px;
+  --padding-end:10px;
 }
 
 .forgot-password {
@@ -56,7 +63,6 @@
 
 .signup {
   text-align: center;
-  font-size: 0.95em;
 
   a {
     color: #2e7d63;

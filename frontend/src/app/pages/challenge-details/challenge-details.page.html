@@ -2,9 +2,12 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/challenge"></ion-back-button>
-      <ion-menu-button color="primary"></ion-menu-button>
     </ion-buttons>
-    <ion-title class="green-text">{{ challenge?.title }}</ion-title>
+    <ion-title class="green-text">{{ challenge?.title}}</ion-title>
+
+     <ion-buttons slot="end">
+      <ion-menu-button side="end" color="primary"></ion-menu-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

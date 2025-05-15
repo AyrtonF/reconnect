@@ -1,83 +1,121 @@
+ion-toolbar {
+  --padding-start: 0;
+  --padding-end: 0;
+  --min-height: 56px; /* altura padrão de header */
+}
+
+.title-page {
+  color: #2e7d63;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.back-button {
+  margin-left: 0.5rem;
+
+  & ion-icon {
+    font-size: 1.5rem;
+    color: var(--ion-color-primary);
+  }
+}
+
 .challenge-page {
+  .container {
+    padding: 16px;
+  }
+
+  .green-text {
+    color: #2e7d63;
+    font-weight: 600;
+  }
+
+  .points {
+    color: #43c170;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .challenge-card {
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    margin-bottom: 20px;
+    padding: 8px;
+
+    ion-item {
+      --inner-padding-end: 0;
+      --background: transparent;
+      align-items: flex-start;
+      display: flex;
+      gap: 12px;
+      padding: 12px 8px;
+      flex-wrap: nowrap;
+
+      ion-thumbnail {
+        flex-shrink: 0;
+
+        img {
+          border-radius: 8px;
+          width: 72px;
+          height: 72px;
+          object-fit: cover;
+        }
+      }
+
+      ion-label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-grow: 1;
+        max-width: 100%;
+
+        .title {
+          color: #2e7d63;
+          font-weight: 600;
+          font-size: 1.1rem;
+          margin: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .description {
+          font-size: 0.9rem;
+          color: #333;
+          margin: 0;
+        }
+      }
+    }
+
+    ion-button {
+      margin: 0 16px 16px 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-transform: none;
+    }
+
+    .participate-button {
+      background-color: var(--ion-color-primary);
+    }
+
+    .see-more-button {
+      --background: #e89a43;
+      color: #fff;
+    }
+  }
+  .points-tag {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #000;
+    text-align: right;
+    margin: 8px 16px 20px 0;
+  }
+  @media (min-width: 768px) {
     .container {
-        padding: 16px;
+      max-width: 600px;
+      margin: auto;
     }
-
-    .green-text {
-        color: #2e7d63;
-        font-weight: 600;
-    }
-
-    .points {
-        color: #43c170;
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 16px;
-    }
-
-    .challenge-card {
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        box-shadow: none;
-        margin-bottom: 16px;
-
-        ion-item {
-            --inner-padding-end: 0;
-            --background: transparent;
-            align-items: flex-start;
-
-            ion-thumbnail {
-                img {
-                    border-radius: 8px;
-                    width: 64px;
-                    height: 64px;
-                    object-fit: cover;
-                }
-            }
-
-            .title {
-                color: #2e7d63;
-                font-weight: 600;
-                font-size: 1rem;
-                margin-bottom: 4px;
-            }
-
-            .description {
-                font-size: 14px;
-                color: #333;
-            }
-
-            .points-tag {
-                font-size: 12px;
-                font-weight: 600;
-                color: #000;
-                white-space: nowrap;
-                margin-left: auto;
-                align-self: center;
-            }
-        }
-
-        .participate-button {
-            margin: 12px 16px 16px 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            text-transform: none;
-            background-color: var(--ion-color-primary);
-        }
-
-        .see-more-button {
-            margin: 12px 16px 16px 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            text-transform: none;
-            --background: #E89A43;
-        }
-    }
-
-    @media (min-width: 768px) {
-        .container {
-            max-width: 600px;
-            margin: auto;
-        }
-    }
+  }
 }
