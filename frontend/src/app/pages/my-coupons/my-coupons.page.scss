@@ -1,0 +1,118 @@
+
+ion-header {
+  ion-toolbar {
+    --background: #ffffff;
+    
+    ion-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.custom-searchbar {
+  --background: #f5f5f5;
+  --border-radius: 8px;
+  --box-shadow: none;
+  --placeholder-color: #666;
+  margin: 16px 0;
+}
+
+.categories-container {
+  margin-bottom: 16px;
+
+  ion-segment {
+    background: transparent;
+    
+    ion-segment-button {
+      --background: transparent;
+      --background-checked: var(--ion-color-primary);
+      --color: #666;
+      --color-checked: #ffffff;
+      --indicator-color: transparent;
+      margin: 0 4px;
+      border-radius: 20px;
+      text-transform: none;
+      
+      &.selected {
+        --background: var(--ion-color-success);
+        --color: #ffffff;
+      }
+
+      &::part(indicator) {
+        display: none;
+      }
+    }
+  }
+}
+
+.coupons-container {
+  .coupon-card {
+    margin: 12px 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+    .coupon-content {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+
+      .coupon-logo {
+        ion-avatar {
+          width: 48px;
+          height: 48px;
+          margin-right: 16px;
+        }
+      }
+
+      .coupon-info {
+        flex: 1;
+
+        h2 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+        }
+
+        p {
+          margin: 4px 0 0;
+          font-size: 0.85rem;
+          color: #666;
+        }
+      }
+
+      .use-button {
+        --padding-start: 24px;
+        --padding-end: 24px;
+        --border-radius: 20px;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (min-width: 768px) {
+  .coupons-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .coupons-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .custom-searchbar {
+    max-width: 600px;
+    margin: 16px auto;
+  }
+
+  .categories-container {
+    max-width: 800px;
+    margin: 16px auto;
+  }
+}

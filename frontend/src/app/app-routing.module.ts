@@ -51,6 +51,14 @@ const routes: Routes = [
   {
     path: 'partner-details',
     loadChildren: () => import('./pages/partner-details/partner-details.module').then( m => m.PartnerDetailsPageModule)
+  },
+  {
+    path: 'my-coupons',
+    loadChildren: () => import('./pages/my-coupons/my-coupons.module').then( m => m.MyCouponsPageModule)
+  },
+  {
+    path: 'profile',
+    loadChildren: () => import('./pages/profile/profile.module').then( m => m.ProfilePageModule)
   }
 ];
 @NgModule({

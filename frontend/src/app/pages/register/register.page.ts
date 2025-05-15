@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-register',
@@ -12,7 +13,7 @@ export class RegisterPage {
   phone: string = '';
   password: string = '';
 
-  constructor() {}
+  constructor(private navCtrl:NavController) {}
 
   register() {
     console.log('Cadastro:', {
@@ -23,5 +24,8 @@ export class RegisterPage {
     });
 
     // Aqui você pode adicionar chamada ao backend, validação etc.
+  }
+   goBack() {
+    this.navCtrl.back();
   }
 }

@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      Meus Cupons
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Barra de Pesquisa -->
+  <ion-searchbar
+    placeholder="Procurar cupom"
+    [(ngModel)]="searchTerm"
+    (ionChange)="onSearch($event)"
+    class="custom-searchbar">
+  </ion-searchbar>
+
+  <!-- Categorias -->
+  <div class="categories-container">
+    <ion-segment [value]="selectedCategory" mode="md">
+      <ion-segment-button 
+        *ngFor="let category of categories"
+        [value]="category"
+        (click)="selectCategory(category)"
+        [class.selected]="selectedCategory === category">
+        <ion-label>{{ category }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <!-- Lista de Cupons -->
+  <div class="coupons-container">
+    <ion-card *ngFor="let coupon of filteredCoupons" class="coupon-card">
+      <ion-card-content>
+        <div class="coupon-content">
+          <div class="coupon-logo">
+            <ion-avatar>
+              <img [src]="coupon.image" alt="logo">
+            </ion-avatar>
+          </div>
+          <div class="coupon-info">
+            <h2>{{ coupon.title }}</h2>
+            <p>{{ coupon.description }}</p>
+          </div>
+          <ion-button 
+            fill="solid"
+            class="use-button"
+            (click)="useCoupon(coupon)">
+            Usar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

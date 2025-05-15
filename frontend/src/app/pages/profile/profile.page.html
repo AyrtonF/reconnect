@@ -1,0 +1,81 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center" color="success">
+      Perfil
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="profile-container">
+    <!-- Avatar -->
+    <div class="avatar-container">
+      <div class="avatar-wrapper">
+        <img [src]="user?.avatar || 'assets/images/default-avatar.png'" alt="Profile photo">
+        <ion-button fill="clear" class="edit-avatar-button" (click)="changeProfileImage()">
+          <ion-icon name="pencil"></ion-icon>
+        </ion-button>
+      </div>
+      <h2 class="user-name">{{ user?.name }}</h2>
+    </div>
+
+    <!-- Info Cards -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <!-- Email -->
+        <div class="info-item">
+          <div class="info-content">
+            <ion-icon name="mail-outline" color="medium"></ion-icon>
+            <ion-input
+              *ngIf="isEditing.email"
+              [(ngModel)]="editValues.email"
+              type="email"
+              placeholder="Digite seu email">
+            </ion-input>
+            <span *ngIf="!isEditing.email">{{ user?.email }}</span>
+          </div>
+          <ion-button fill="clear" (click)="isEditing.email ? saveField('email') : toggleEdit('email')">
+            <ion-icon [name]="isEditing.email ? 'checkmark-outline' : 'pencil-outline'"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Phone -->
+        <div class="info-item">
+          <div class="info-content">
+            <ion-icon name="call-outline" color="medium"></ion-icon>
+            <ion-input
+              *ngIf="isEditing.phone"
+              [(ngModel)]="editValues.phone"
+              type="tel"
+              placeholder="Digite seu telefone">
+            </ion-input>
+            <span *ngIf="!isEditing.phone">{{ user?.phone }}</span>
+          </div>
+          <ion-button fill="clear" (click)="isEditing.phone ? saveField('phone') : toggleEdit('phone')">
+            <ion-icon [name]="isEditing.phone ? 'checkmark-outline' : 'pencil-outline'"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Password -->
+        <div class="info-item">
+          <div class="info-content">
+            <ion-icon name="key-outline" color="medium"></ion-icon>
+            <ion-input
+              *ngIf="isEditing.password"
+              [(ngModel)]="editValues.password"
+              type="password"
+              placeholder="Digite sua nova senha">
+            </ion-input>
+            <span *ngIf="!isEditing.password">••••••••••••</span>
+          </div>
+          <ion-button fill="clear" (click)="isEditing.password ? saveField('password') : toggleEdit('password')">
+            <ion-icon [name]="isEditing.password ? 'checkmark-outline' : 'pencil-outline'"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

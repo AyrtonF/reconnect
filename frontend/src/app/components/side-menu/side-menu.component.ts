@@ -14,17 +14,17 @@ export class SideMenuComponent {
     {
       icon: 'person',
       label: 'Perfil',
-      route: '/perfil'
+      route: '/profile'
     },
     {
       icon: 'ticket',
       label: 'Meus Cupons',
-      route: '/meus-cupons'
+      route: '/my-coupons'
     },
     {
       icon: 'settings',
       label: 'Configurações',
-      route: '/configuracoes'
+      route: '/settings'
     }
   ];
 

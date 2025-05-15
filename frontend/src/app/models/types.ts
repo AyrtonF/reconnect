@@ -178,6 +178,7 @@ export type Post = {
 export type Coupon = {
   id: number;
   title: string;
+  image?: string;
   description?: string;
   scoreRequired?: number;
   validUntil?: string;
