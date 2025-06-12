@@ -16,6 +16,7 @@ export class AuthService {
     { id: 1, name: 'André', email: 'andre@gmail.com', password: '123456', role: 'user' },
     { id: 2, name: 'Maria', email: 'maria@gmail.com', password: 'senha123', role: 'admin' },
     { id: 3, name: 'João', email: 'joao@gmail.com', password: 'abc123', role: 'user' },
+    { id: 4, name: 'Joao Silva', email: 'joao.silva@mentestudy.com', password: '123456', role: 'institution_admin' },
   ];
 
   constructor() { }
