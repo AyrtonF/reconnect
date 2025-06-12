@@ -6,9 +6,12 @@ import {
   TextMaterial, 
   Quiz, 
   Achievement, 
-  QuizAttempt 
+  QuizAttempt,
+  InstitutionCourse
 } from '../models/types';
-import { Observable, of } from 'rxjs';
+import { Observable, combineLatest, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { CourseInstitutionService } from './course-institution.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +30,6 @@ export class CourseService {
       price: 99.90,
       isEnrolled: true,
       enrollmentDate: new Date('2025-05-01'),
-
       modules: [
         {
           id: 1,
@@ -42,7 +44,7 @@ export class CourseService {
                 id: 1,
                 title: 'Fundamentos de Segurança Digital',
                 description: 'Aprenda os conceitos básicos',
-                duration: 1200, // 20 minutos
+                duration: 1200,
                 url: 'assets/videos/aula1.mp4',
                 thumbnail: '../../../assets/images/course2.png',
                 isWatched: true,
@@ -90,7 +92,6 @@ export class CourseService {
           }
         }
       ],
-
       progress: {
         completed: 8,
         total: 10,
@@ -98,7 +99,6 @@ export class CourseService {
         lastAccessDate: new Date('2025-05-14'),
         status: 'in_progress'
       },
-
       score: {
         current: 150,
         total: 200,
@@ -114,7 +114,6 @@ export class CourseService {
           }
         ]
       },
-
       createdAt: new Date('2025-01-01'),
       updatedAt: new Date('2025-05-14'),
       tags: ['segurança', 'internet', 'adolescentes'],
@@ -132,7 +131,6 @@ export class CourseService {
       price: 79.90,
       isEnrolled: false,
       enrollmentDate: new Date('2025-05-01'),
-
       modules: [
         {
           id: 1,
@@ -148,7 +146,6 @@ export class CourseService {
           }
         }
       ],
-
       progress: {
         completed: 0,
         total: 10,
@@ -156,28 +153,122 @@ export class CourseService {
         lastAccessDate: new Date('2025-05-14'),
         status: 'not_started'
       },
-
       score: {
         current: 0,
         total: 100,
         achievements: []
       },
-
       createdAt: new Date('2025-01-01'),
       updatedAt: new Date('2025-05-14'),
       tags: ['segurança', 'internet', 'crianças'],
       prerequisites: []
     }
-    // Adicione mais cursos conforme necessário
   ];
 
-  constructor() { }
+  constructor(private courseInstitutionService: CourseInstitutionService) {}
 
   getAllCourses(): Observable<Course[]> {
-    return of(this.courses);
+    return combineLatest([
+      of(this.courses),
+      this.courseInstitutionService.getCourses()
+    ]).pipe(
+      map(([regularCourses, institutionalCourses]) => {
+        const convertedInstitutionalCourses: Course[] = institutionalCourses.map(instCourse => ({
+          id: instCourse.id + 1000, // Evitar conflito de IDs
+          title: instCourse.name,
+          description: instCourse.description,
+          instructor: 'Instrutor Institucional',
+          thumbnail: instCourse.image || '../../../assets/images/course-placeholder.jpg',
+          workload: 0,
+          category: 'Institucional',
+          level: 'beginner',
+          price: 0,
+          isEnrolled: false,
+          enrollmentDate: instCourse.createdAt,
+          modules: [],
+          progress: {
+            completed: 0,
+            total: 0,
+            percentageCompleted: 0,
+            lastAccessDate: new Date(),
+            status: 'not_started'
+          },
+          score: {
+            current: 0,
+            total: 0,
+            achievements: []
+          },
+          createdAt: instCourse.createdAt,
+          updatedAt: instCourse.updatedAt,
+          tags: [],
+          prerequisites: []
+        }));
+
+        return [...regularCourses, ...convertedInstitutionalCourses].sort((a, b) => 
+          b.createdAt.getTime() - a.createdAt.getTime()
+        );
+      })
+    );
   }
 
+  enrollInCourse(courseId: number): Observable<Course | undefined> {
+  const course = this.courses.find(c => c.id === courseId);
+  if (!course) return of(undefined);
+
+  course.isEnrolled = true;
+  course.enrollmentDate = new Date();
+  course.progress = {
+    completed: 0,
+    total: this.calculateTotalItems(course),
+    percentageCompleted: 0,
+    lastAccessDate: new Date(),
+    status: 'in_progress'
+  };
+
+  return this.updateCourse(course);
+}
+
   getCourseById(id: number): Observable<Course | undefined> {
+    // Se o ID é maior que 1000, é um curso institucional
+    if (id > 1000) {
+      return this.courseInstitutionService.getCourseById(id - 1000).pipe(
+        map(response => {
+          if (!response.success || !response.data) return undefined;
+          const instCourse = response.data;
+          return {
+            id: instCourse.id + 1000,
+            title: instCourse.name,
+            description: instCourse.description,
+            instructor: 'Instrutor Institucional',
+            thumbnail: instCourse.image || '../../../assets/images/course-placeholder.jpg',
+            workload: 0,
+            category: 'Institucional',
+            level: 'beginner',
+            price: 0,
+            isEnrolled: false,
+            enrollmentDate: instCourse.createdAt,
+            modules: [],
+            progress: {
+              completed: 0,
+              total: 0,
+              percentageCompleted: 0,
+              lastAccessDate: new Date(),
+              status: 'not_started'
+            },
+            score: {
+              current: 0,
+              total: 0,
+              achievements: []
+            },
+            createdAt: instCourse.createdAt,
+            updatedAt: instCourse.updatedAt,
+            tags: [],
+            prerequisites: []
+          };
+        })
+      );
+    }
+
     const course = this.courses.find(course => course.id === id);
     return of(course);
   }
@@ -211,8 +302,6 @@ export class CourseService {
     this.courses = this.courses.filter(course => course.id !== id);
     return of(this.courses.length < initialLength);
   }
-
-  // Novos métodos para gerenciar funcionalidades específicas
 
   updateCourseProgress(courseId: number, moduleId: number, contentType: 'video' | 'text' | 'quiz', contentId: number): Observable<Course | undefined> {
     const course = this.courses.find(c => c.id === courseId);
@@ -277,8 +366,6 @@ export class CourseService {
     }
     return Math.max(...this.courses.map(course => course.id)) + 1;
   }
-
-  // Métodos adicionais para gerenciar conquistas e pontuações
 
   addAchievement(courseId: number, achievement: Achievement): Observable<Course | undefined> {
     const course = this.courses.find(c => c.id === courseId);

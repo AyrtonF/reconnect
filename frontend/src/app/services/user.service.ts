@@ -2,11 +2,25 @@ import { Injectable } from '@angular/core';
 import { User } from '../models/types';
 import { Observable, of } from 'rxjs';
 
+export type UserType = 'standard' | 'institutional';
+
+export interface InstitutionalUser extends User {
+  userType: 'institutional';
+  institutionId: number;
+  permissions: {
+    canCreateCourses: boolean;
+    canEditCourses: boolean;
+    canDeleteCourses: boolean;
+    canManageUsers: boolean;
+    canViewReports: boolean;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private users: User[] = [
+  private users: (User | InstitutionalUser)[] = [
     {
       id: 1,
       name: 'André',
@@ -36,51 +50,84 @@ export class UserService {
       pendingChallengesIds: [1],
       couponsIds: [2]
     },
-    // Adicione mais usuários de mock conforme necessário
+    // Usuários institucionais
+    {
+      id: 3,
+      name: 'João Silva',
+      email: 'joao.silva@mentestudy.com',
+      password: '123456',
+      role: 'institution_admin',
+      userType: 'institutional',
+      institutionId: 1,
+      avatar: 'assets/images/avatars/joao.jpg',
+      phone: '(81) 99999-1234',
+      permissions: {
+        canCreateCourses: true,
+        canEditCourses: true,
+        canDeleteCourses: true,
+        canManageUsers: true,
+        canViewReports: true
+      }
+    },
+    {
+      id: 4,
+      name: 'Maria Santos',
+      email: 'maria.santos@mentestudy.com',
+      password: '123456',
+      role: 'institution_teacher',
+      userType: 'institutional',
+      institutionId: 1,
+      avatar: 'assets/images/avatars/maria.jpg',
+      phone: '(81) 99999-5678',
+      permissions: {
+        canCreateCourses: true,
+        canEditCourses: true,
+        canDeleteCourses: false,
+        canManageUsers: false,
+        canViewReports: true
+      }
+    }
   ];
 
   constructor() { }
 
-  // Retorna todos os usuários
-  getAllUsers(): Observable<User[]> {
+  getAllUsers(): Observable<(User | InstitutionalUser)[]> {
     return of(this.users);
   }
 
-  // Retorna um usuário pelo ID
-  getUserById(id: number): Observable<User | undefined> {
+  getUserById(id: number): Observable<User | InstitutionalUser | undefined> {
     const user = this.users.find(user => user.id === id);
     return of(user);
   }
 
-  // Adiciona um novo usuário
-  addUser(user: User): Observable<User> {
-    user.id = this.generateId(); // Simula a geração de um ID
+  getInstitutionalUsers(): Observable<InstitutionalUser[]> {
+    return of(this.users.filter(user => 
+      'userType' in user && user.userType === 'institutional'
+    ) as InstitutionalUser[]);
+  }
+
+  addUser(user: User | InstitutionalUser): Observable<User | InstitutionalUser> {
+    user.id = this.generateId();
     this.users.push(user);
     return of(user);
   }
 
-  // Atualiza um usuário existente
-  updateUser(updatedUser: User): Observable<User | undefined> {
+  updateUser(updatedUser: User | InstitutionalUser): Observable<User | InstitutionalUser | undefined> {
     const index = this.users.findIndex(user => user.id === updatedUser.id);
     if (index !== -1) {
       this.users[index] = updatedUser;
       return of(updatedUser);
     }
-    return of(undefined); // Retorna undefined se o usuário não for encontrado
+    return of(undefined);
   }
 
-  // Deleta um usuário pelo ID
   deleteUser(id: number): Observable<boolean> {
     const initialLength = this.users.length;
     this.users = this.users.filter(user => user.id !== id);
     return of(this.users.length < initialLength);
   }
 
-  // Simula a geração de um ID único
   private generateId(): number {
-    if (this.users.length === 0) {
-      return 1;
-    }
     return Math.max(...this.users.map(user => user.id)) + 1;
   }
 }

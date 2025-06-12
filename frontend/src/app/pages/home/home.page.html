@@ -4,20 +4,18 @@
       <ion-menu-button color="primary"></ion-menu-button>
     </ion-buttons>
     <ion-title slot="center">
-        <img src="../../../../assets/images/logo.png" alt="Logo" class="logo" />
-      </ion-title>
+      <img src="../../../../assets/images/logo.png" alt="Logo" class="logo" />
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="home-page">
-
   <!-- Topo com logo e menu -->
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-buttons slot="start">
         <ion-menu-button color="primary"></ion-menu-button>
       </ion-buttons>
-      
     </ion-toolbar>
   </ion-header>
 
@@ -50,32 +48,49 @@
     <!-- Cursos em andamento -->
     <h3 class="section-title">Cursos em Andamento</h3>
 
-    <ion-card class="course-card">
-      <img src="../../../../assets/images/course-image.png" alt="Curso" />
-      <ion-card-header>
-        <ion-card-title class="orange-text">
-          O Impacto do Uso Excessivo da Internet
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <p class="description">
-          Entenda os sinais de dependência digital em crianças e adolescentes e aprenda estratégias para promover um uso
-          saudável da tecnologia.
-        </p>
+    <ng-container *ngIf="inProgressCourses.length > 0">
+      <ion-card class="course-card" *ngFor="let course of inProgressCourses">
+        <img [src]="course.thumbnail" [alt]="course.title" />
+        <ion-card-header>
+          <ion-card-title class="orange-text">
+            {{ course.title }}
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="description">{{ course.description }}</p>
 
-        <div class="progress-section">
-          <div class="progress-text">
-            <span>Progresso: {{ progress }}%</span>
-            <span>{{ pointsAwarded }} pts</span>
+          <div class="progress-section">
+            <div class="progress-text">
+              <span
+                >Progresso: {{ course.progress?.percentageCompleted || 0
+                }}%</span
+              >
+              <span>{{ course.score?.current || 0 }} pts</span>
+            </div>
+            <ion-progress-bar
+              [value]="(course.progress?.percentageCompleted || 0) / 100"
+              color="warning"
+            >
+            </ion-progress-bar>
           </div>
-          <ion-progress-bar value="0.05" color="warning"></ion-progress-bar>
-        </div>
 
-        <ion-button expand="block" color="warning" class="access-button">
-          Acessar curso
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
+          <ion-button
+            expand="block"
+            color="warning"
+            class="access-button"
+            (click)="accessCourse(course.id)"
+          >
+            ACESSAR CURSO
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+
+    <div *ngIf="inProgressCourses.length === 0" class="no-courses">
+      <p>Você ainda não tem cursos em andamento.</p>
+      <ion-button color="primary" (click)="navigateToPage('courses')">
+        Explorar cursos
+      </ion-button>
+    </div>
   </div>
-
 </ion-content>

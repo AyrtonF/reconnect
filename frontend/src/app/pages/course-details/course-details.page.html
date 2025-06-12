@@ -1,12 +1,11 @@
 <ion-content *ngIf="course$ | async as course">
   <!-- Header -->
-  <ion-header>
+  <ion-header class="ion-no-border">
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-back-button defaultHref="/courses"></ion-back-button>
-          <ion-menu-button color="primary"></ion-menu-button>
+        <ion-back-button defaultHref="/courses" text=""></ion-back-button>
       </ion-buttons>
-      <ion-title>{{ course?.title }}</ion-title>
+      <ion-title class="ion-text-center title-green">{{ course?.title }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -16,160 +15,141 @@
     <div class="course-info">
       <h1>{{ course?.title }}</h1>
       <p>{{ course?.description }}</p>
-      <div class="course-meta">
-        <ion-badge color="primary">{{ course?.level }}</ion-badge>
-        <ion-badge color="secondary">{{ course?.category }}</ion-badge>
-        <ion-badge color="tertiary">{{ course?.workload }} min</ion-badge>
-      </div>
     </div>
   </div>
 
   <!-- Progresso -->
-  <ion-card>
-    <ion-card-content>
-      <div class="progress-container">
-        <div class="progress-info">
-          <h2>Seu Progresso</h2>
-          <p>{{ course?.progress?.percentageCompleted ?? 0 }}% Completo</p>
-        </div>
-        <ion-progress-bar
-          [value]="(course?.progress?.percentageCompleted ?? 0) / 100"
-          [color]="(course?.progress?.percentageCompleted === 100) ? 'success' : 'primary'">
-        </ion-progress-bar>
-      </div>
-    </ion-card-content>
-  </ion-card>
+  <div class="progress-section">
+    <div class="progress-header">
+      <span>Seu progresso:</span>
+      <span class="progress-percentage">{{ course?.progress?.percentageCompleted ?? 0 }}% Completo</span>
+    </div>
+    <ion-progress-bar
+      class="custom-progress"
+      [value]="(course?.progress?.percentageCompleted ?? 0) / 100"
+      color="success">
+    </ion-progress-bar>
+  </div>
 
   <!-- Módulos -->
-  <ion-list>
-    <ion-list-header>
-      <ion-label>Módulos do Curso</ion-label>
-    </ion-list-header>
+  <div class="modules-section">
+    <h2>Módulos do Curso</h2>
 
-    <ion-item *ngFor="let module of course?.modules ?? []" 
-              [class.active]="currentModule?.id === module?.id"
-              (click)="selectModule(module)"
-              [disabled]="module?.isLocked">
-      <ion-icon slot="start" 
-                [name]="module?.isLocked ? 'lock-closed' : 'folder-open'">
-      </ion-icon>
-      <ion-label>
-        <h2>{{ module?.title }}</h2>
-        <p>{{ module?.description }}</p>
+    <div class="module-item" 
+         *ngFor="let module of course?.modules"
+         [class.active]="currentModule?.id === module?.id"
+         (click)="selectModule(module)">
+      <div class="module-header">
+        <ion-icon name="folder-open-outline" class="folder-icon"></ion-icon>
+        <div class="module-info">
+          <h3>{{ module?.title }}</h3>
+          <p>{{ module?.description }}</p>
+        </div>
+      </div>
+      <div class="module-progress">
         <ion-progress-bar 
           [value]="moduleProgress(module) / 100"
-          color="secondary">
+          color="primary">
         </ion-progress-bar>
-      </ion-label>
-      <ion-note slot="end">{{ moduleProgress(module) }}%</ion-note>
-    </ion-item>
-  </ion-list>
-
-  <!-- Conteúdo do módulo -->
-  <div *ngIf="currentModule" class="module-content">
-    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
-      <ion-segment-button value="videos">
-        <ion-label>Vídeos</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="materials">
-        <ion-label>Material</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="quizzes">
-        <ion-label>Quizzes</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-
-    <!-- Vídeos -->
-    <div *ngIf="selectedSegment === 'videos'">
-      <ion-list>
-        <ion-item *ngFor="let video of currentModule?.content?.videos ?? []"
-                  (click)="playVideo(video)">
-          <ion-thumbnail slot="start">
-            <img [src]="video?.thumbnail" [alt]="video?.title">
-          </ion-thumbnail>
-          <ion-label>
-            <h2>{{ video?.title }}</h2>
-            <p>{{ video?.description }}</p>
-            <p>{{ `${formatDuration(video?.duration || 0) }`}}</p>
-          </ion-label>
-          <ion-icon 
-            slot="end"
-            [name]="video?.isWatched ? 'checkmark-circle' : 'play-circle'"
-            [color]="video?.isWatched ? 'success' : 'primary'">
-          </ion-icon>
-        </ion-item>
-      </ion-list>
-    </div>
-
-    <!-- Materiais -->
-    <div *ngIf="selectedSegment === 'materials'">
-      <ion-list>
-        <ion-item *ngFor="let material of currentModule?.content?.textMaterials ?? []"
-                  (click)="readMaterial(material)">
-          <ion-icon slot="start" name="document-text"></ion-icon>
-          <ion-label>
-            <h2>{{ material?.title }}</h2>
-            <p>Tempo estimado: {{ material?.estimatedReadTime ?? 0 }} min</p>
-          </ion-label>
-      <!--     <ion-button slot="end" *ngIf="material?.attachments?.length"
-                      (click)="downloadAttachment(material.attachments[0])">
-            <ion-icon name="download"></ion-icon>
-          </ion-button> -->
-          <ion-icon 
-            slot="end" 
-            *ngIf="material?.isRead"
-            name="checkmark-circle" 
-            color="success">
-          </ion-icon>
-        </ion-item>
-      </ion-list>
-    </div>
-
-    <!-- Quizzes -->
-    <div *ngIf="selectedSegment === 'quizzes'">
-      <ion-list>
-        <ion-item *ngFor="let quiz of currentModule?.content?.quizzes ?? []"
-                  (click)="startQuiz(quiz)">
-          <ion-icon slot="start" name="help-circle"></ion-icon>
-          <ion-label>
-            <h2>{{ quiz?.title }}</h2>
-            <p>{{ quiz?.description }}</p>
-            <p *ngIf="quiz?.timeLimit">
-              Tempo limite: {{ quiz.timeLimit }} minutos
-            </p>
-          </ion-label>
-          <div slot="end" class="quiz-status">
-            <ion-badge *ngIf="quiz?.bestScore" color="success">
-              {{ quiz.bestScore }}%
-            </ion-badge>
-            <ion-icon 
-              *ngIf="quiz?.isCompleted"
-              name="checkmark-circle" 
-              color="success">
-            </ion-icon>
-          </div>
-        </ion-item>
-      </ion-list>
+        <span>{{ moduleProgress(module) }}%</span>
+      </div>
     </div>
   </div>
 
-  <!-- Quiz Modal -->
-  <ion-modal [isOpen]="showQuizModal" (didDismiss)="showQuizModal = false">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>{{ currentQuiz?.title }}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="showQuizModal = false">
-              Fechar
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <!-- Implementar componente de quiz aqui -->
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+  <!-- Conteúdo do módulo -->
+  <div *ngIf="currentModule" class="module-content">
+    <div class="segment-container">
+      <ion-segment [(ngModel)]="selectedSegment" mode="ios">
+        <ion-segment-button value="videos">
+          <ion-label>VÍDEOS</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="materials">
+          <ion-label>MATERIAL</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="quizzes">
+          <ion-label>QUIZZES</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
 
+    <!-- Vídeos -->
+    <div *ngIf="selectedSegment === 'videos'" class="content-list">
+      <div class="content-item" *ngFor="let video of currentModule?.content?.videos">
+        <ion-icon name="play-circle-outline" class="video-icon"></ion-icon>
+        <div class="content-info" (click)="playVideo(video)">
+          <h3>{{ video?.title }}</h3>
+          <p>{{ video?.description }}</p>
+        </div>
+        <ion-icon 
+          class="status-icon"
+          [name]="video?.isWatched ? 'checkmark-circle' : 'ellipse-outline'"
+          [color]="video?.isWatched ? 'success' : 'medium'">
+        </ion-icon>
+      </div>
+    </div>
+
+    <!-- Materiais -->
+    <div *ngIf="selectedSegment === 'materials'" class="content-list">
+      <div class="content-item" *ngFor="let material of currentModule?.content?.textMaterials">
+        <ion-icon name="document-text-outline" class="material-icon"></ion-icon>
+        <div class="content-info" (click)="readMaterial(material)">
+          <h3>{{ material?.title }}</h3>
+          <p>Tempo estimado: {{ material?.estimatedReadTime }} min</p>
+        </div>
+        <ion-icon 
+          class="status-icon"
+          [name]="material?.isRead ? 'checkmark-circle' : 'ellipse-outline'"
+          [color]="material?.isRead ? 'success' : 'medium'">
+        </ion-icon>
+      </div>
+    </div>
+
+    <!-- Quizzes -->
+    <div *ngIf="selectedSegment === 'quizzes'" class="content-list">
+      <div class="content-item" *ngFor="let quiz of currentModule?.content?.quizzes">
+        <ion-icon name="help-circle-outline" class="quiz-icon"></ion-icon>
+        <div class="content-info" (click)="startQuiz(quiz)">
+          <h3>{{ quiz?.title }}</h3>
+          <p>{{ quiz?.description }}</p>
+        </div>
+        <ion-icon 
+          class="status-icon"
+          [name]="quiz?.isCompleted ? 'checkmark-circle' : 'ellipse-outline'"
+          [color]="quiz?.isCompleted ? 'success' : 'medium'">
+        </ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adicione isso no final do seu template, antes do fechamento do ion-content -->
+<ion-modal [isOpen]="showQuizModal" (didDismiss)="showQuizModal = false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ currentQuiz?.title }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="showQuizModal = false">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div *ngIf="currentQuiz">
+        <!-- Aqui você pode implementar o template do quiz -->
+        <div *ngFor="let question of currentQuiz.questions">
+          <h3>{{ question.text }}</h3>
+          <ion-list>
+            <ion-radio-group>
+              <ion-item *ngFor="let option of question.options; let i = index">
+                <ion-label>{{ option }}</ion-label>
+                <ion-radio [value]="i"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </ion-list>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
 </ion-content>

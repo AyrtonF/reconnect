@@ -109,3 +109,74 @@
     }
   }
 }
+// ... estilos anteriores permanecem iguais ...
+
+.course-card {
+  margin: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  ion-card-header {
+    padding: 1rem;
+
+    .orange-text {
+      color: #F5A442;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+  }
+
+  ion-card-content {
+    padding: 0 1rem 1rem;
+
+    .description {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .progress-section {
+      margin: 1rem 0;
+
+      .progress-text {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+      }
+
+      ion-progress-bar {
+        --progress-background: #F5A442;
+        height: 8px;
+        border-radius: 4px;
+      }
+    }
+
+    .access-button {
+      --background: #F5A442;
+      --color: white;
+      margin-top: 1rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      height: 44px;
+    }
+  }
+}
+
+.no-courses {
+  text-align: center;
+  padding: 2rem;
+  
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 1rem;
+  }
+}

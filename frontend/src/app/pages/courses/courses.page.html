@@ -1,104 +1,38 @@
 <ion-content>
-  <ion-header>
+  <ion-header class="ion-no-border">
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-button fill="clear" class="back-button" (click)="goHome()">
+        <ion-button (click)="goBack()">
           <ion-icon name="chevron-back-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
-      <ion-title class="green-text">Educação</ion-title>
-      <ion-buttons slot="end">
-        <ion-menu-button color="primary"></ion-menu-button>
-      </ion-buttons>
+      <ion-title class="ion-text-center title-green">Educação</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <ion-searchbar [(ngModel)]="searchTerm" placeholder="Buscar cursos" animated class="searchBar">
-  </ion-searchbar>
+  <div class="search-container">
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="filterCourses($event)"
+      placeholder="Procurar cursos"
+      class="custom-searchbar"
+    ></ion-searchbar>
+  </div>
 
-  <!-- Estatísticas do Usuário -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Seu Progresso</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col>
-            <div class="stat-item">
-              <h3>{{userStats.totalCourses}}</h3>
-              <p>Cursos</p>
-            </div>
-          </ion-col>
-          <ion-col>
-            <div class="stat-item">
-              <h3>{{userStats.completedCourses}}</h3>
-              <p>Concluídos</p>
-            </div>
-          </ion-col>
-          <ion-col>
-            <div class="stat-item">
-              <h3>{{userStats.totalPoints}}</h3>
-              <p>Pontos</p>
-            </div>
-          </ion-col>
-          <ion-col>
-            <div class="stat-item">
-              <h3>{{userStats.totalAchievements}}</h3>
-              <p>Conquistas</p>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Cursos em Progresso -->
-  <ion-list>
-    <ion-list-header>
-      <ion-label>Continue Aprendendo</ion-label>
-    </ion-list-header>
-
-    <ion-item *ngFor="let course of inProgressCourses$ | async">
-      <ion-thumbnail slot="start">
-        <img [src]="course.thumbnail" [alt]="course.title" />
-      </ion-thumbnail>
-      <ion-label>
-        <h2>{{course.title}}</h2>
-        <p>{{course.description}}</p>
-        <ion-progress-bar
-          [value]="course.progress.percentageCompleted / 100"
-          [color]="getProgressColor(course.progress.percentageCompleted)"
+  <div class="courses-container">
+    <div *ngFor="let course of courses$ | async" class="course-card">
+      <img [src]="course.thumbnail" [alt]="course.title" class="course-image">
+      <div class="course-content">
+        <h2 class="course-title">{{ course.title }}</h2>
+        <p class="course-description">{{ course.description }}</p>
+        <ion-button 
+          expand="block" 
+          class="start-button"
+          (click)="startCourse(course)"
         >
-        </ion-progress-bar>
-        <p class="progress-text">
-          {{course.progress.percentageCompleted}}% concluído
-        </p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-
-  <!-- Cursos Disponíveis -->
-  <ion-list>
-    <ion-list-header>
-      <ion-label>Cursos Disponíveis</ion-label>
-    </ion-list-header>
-
-    <ion-item *ngFor="let course of availableCourses$ | async">
-      <ion-thumbnail slot="start">
-        <img [src]="course.thumbnail" [alt]="course.title" />
-      </ion-thumbnail>
-      <ion-label>
-        <h2>{{course.title}}</h2>
-        <p>{{course.description}}</p>
-        <ion-badge color="primary">{{course.level}}</ion-badge>
-        <ion-badge color="secondary"
-          >{{formatDuration(course.workload)}}</ion-badge
-        >
-      </ion-label>
-      <ion-button slot="end" (click)="enrollInCourse(course.id)">
-        Matricular
-      </ion-button>
-    </ion-item>
-  </ion-list>
+          Iniciar curso
+        </ion-button>
+      </div>
+    </div>
+  </div>
 </ion-content>

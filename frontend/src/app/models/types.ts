@@ -5,6 +5,7 @@ export type User = {
   email: string;
   password?: string;
   role: string;
+  institutionId?: number;
   phone?: string;
   score?: number;
   avatar?: string;
@@ -285,4 +286,25 @@ export type PaginatedResponse<T> = {
   page: number;
   pageSize: number;
   totalPages: number;
+};
+
+export type InstitutionUser = {
+  id: number;
+  name: string;
+  email: string;
+  password?: string;
+  role: 'institution_admin' | 'institution_teacher' | 'institution_staff';
+  institutionId: number;
+  avatar?: string;
+  phone?: string;
+  status: 'active' | 'inactive';
+  permissions: {
+    canCreateCourses: boolean;
+    canEditCourses: boolean;
+    canDeleteCourses: boolean;
+    canManageUsers: boolean;
+    canViewReports: boolean;
+  };
+  createdAt: Date;
+  updatedAt: Date;
 };
