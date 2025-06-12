@@ -9,9 +9,9 @@ import { Observable, of } from 'rxjs';
 })
 export class PostService {
   private posts: Post[] = [
-    { id: 1, userId: 1, familyId: 1, caption: 'Corrida no parque...', image: 'assets/family/corrida.jpg', likes: 10, timestamp: '2025-05-13T08:39:00Z' },
-    { id: 2, userId: 2, familyId: 1, caption: 'Almoço em família hoje!', likes: 15, timestamp: '2025-05-13T12:00:00Z' },
-    { id: 3, userId: 4, familyId: 2, caption: 'Piquenique no domingo.', image: 'assets/family/piquenique.jpg', likes: 8, timestamp: '2025-05-18T10:00:00Z' },
+    { id: 1, userId: 1, familyId: 1, caption: 'Corrida no parque...', image: '../../assets/images/marcos-corrida.png', likes: 10, timestamp: '2025-05-13T08:39:00Z' },
+    { id: 2, userId: 2, familyId: 1, caption: 'Pedalada em familia!', image:'../../assets/images/pedalada.png', likes: 15, timestamp: '2025-05-13T12:00:00Z' },
+    { id: 3, userId: 4, familyId: 2, caption: 'Piquenique no domingo.', image: '../../assets/images/corrida.png', likes: 8, timestamp: '2025-05-18T10:00:00Z' },
     // Adicione mais posts conforme necessário
   ];
 

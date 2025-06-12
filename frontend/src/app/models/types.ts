@@ -1,3 +1,4 @@
+// User related types
 export type User = {
   id: number;
   name: string;
@@ -16,6 +17,92 @@ export type User = {
   posts?: number[];
 };
 
+// Institution related types
+export type Institution = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  logo?: string;
+  description?: string;
+  coursesIds?: number[];
+  studentsIds?: number[];
+  createdAt: Date;
+  updatedAt: Date;
+  status: 'active' | 'inactive' | 'pending';
+  socialMedia?: {
+    website?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+  };
+  settings?: {
+    allowEnrollment: boolean;
+    requireApproval: boolean;
+    maxStudentsPerCourse?: number;
+  };
+};
+
+// Course related types for institutions
+export type InstitutionCourse = {
+  id: number;
+  institutionId: number;
+  name: string;
+  description: string;
+  image?: string;
+  materials: InstitutionMaterial[];
+  videos: InstitutionVideo[];
+  questions: InstitutionQuestion[];
+  createdAt: Date;
+  updatedAt: Date;
+  status: 'draft' | 'published' | 'archived';
+  studentsEnrolled?: number[];
+  settings?: {
+    allowEnrollment: boolean;
+    requireApproval: boolean;
+    maxStudents?: number;
+  };
+};
+
+export type InstitutionMaterial = {
+  id: number;
+  courseId: number;
+  title: string;
+  description: string;
+  filename: string;
+  file?: File;
+  type: string;
+  size?: number;
+  uploadedAt: Date;
+  updatedAt?: Date;
+};
+
+export type InstitutionVideo = {
+  id: number;
+  courseId: number;
+  title: string;
+  description: string;
+  filename: string;
+  file?: File;
+  duration?: number;
+  thumbnail?: string;
+  url?: string;
+  uploadedAt: Date;
+  updatedAt?: Date;
+};
+
+export type InstitutionQuestion = {
+  id: number;
+  courseId: number;
+  question: string;
+  alternatives: string[];
+  correctAnswer: number;
+  createdAt: Date;
+  updatedAt?: Date;
+};
+
+// Challenge related types
 export type Challenge = {
   id: number;
   title: string;
@@ -23,33 +110,60 @@ export type Challenge = {
   status: string;
   participantsIds?: number[];
   image?: string;
-  imageBanner?:string;
+  imageBanner?: string;
   checks?: number;
   score?: number;
   type: string;
   familyId?: number;
 };
 
-;
-export type Course = {
+// Family related types
+export type Family = {
+  id: number;
+  name: string;
+  membersIds?: number[];
+  postsIds?: number[];
+  challengesIds?: number[];
+};
+
+// Post related types
+export type Post = {
+  id: number;
+  userId: number;
+  familyId?: number;
+  caption?: string;
+  image?: string;
+  likes?: number;
+  timestamp?: string;
+};
+
+// Coupon related types
+export type Coupon = {
+  id: number;
+  title: string;
+  image?: string;
+  description?: string;
+  scoreRequired?: number;
+  validUntil?: string;
+};
+
+// Student course types (for consuming courses)
+export type StudentCourse = {
   id: number;
   title: string;
   description: string;
   instructor: string;
   thumbnail?: string;
-  workload: number; // in minutes
+  workload: number;
   category: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   
-  // Price and enrollment
   price: number;
   isEnrolled?: boolean;
   enrollmentDate?: Date;
   
-  // Content
   modules: CourseModule[];
   
-  // Progress tracking
   progress: {
     completed: number;
     total: number;
@@ -58,19 +172,20 @@ export type Course = {
     status: 'not_started' | 'in_progress' | 'completed';
   };
   
-  // Points and achievements
   score: {
     current: number;
     total: number;
     achievements: Achievement[];
   };
   
-  // Metadata
   createdAt: Date;
   updatedAt: Date;
   tags: string[];
   prerequisites?: string[];
 };
+
+// Alias for backwards compatibility
+export type Course = StudentCourse;
 
 export type CourseModule = {
   id: number;
@@ -79,7 +194,7 @@ export type CourseModule = {
   order: number;
   
   content: {
-    videos: Video[];
+    videos: StudentVideo[];
     textMaterials: TextMaterial[];
     quizzes: Quiz[];
   };
@@ -88,11 +203,11 @@ export type CourseModule = {
   progress: number;
 };
 
-export type Video = {
+export type StudentVideo = {
   id: number;
   title: string;
   description: string;
-  duration: number; // in seconds
+  duration: number;
   url: string;
   thumbnail?: string;
   isWatched: boolean;
@@ -104,7 +219,7 @@ export type TextMaterial = {
   id: number;
   title: string;
   content: string;
-  estimatedReadTime: number; // in minutes
+  estimatedReadTime: number;
   isRead: boolean;
   attachments?: {
     name: string;
@@ -117,15 +232,15 @@ export type Quiz = {
   id: number;
   title: string;
   description: string;
-  questions: Question[];
-  timeLimit?: number; // in minutes
+  questions: QuizQuestion[];
+  timeLimit?: number;
   minimumScore: number;
   attempts: QuizAttempt[];
   isCompleted: boolean;
   bestScore?: number;
 };
 
-export type Question = {
+export type QuizQuestion = {
   id: number;
   text: string;
   type: 'multiple_choice' | 'true_false' | 'essay';
@@ -156,30 +271,18 @@ export type Achievement = {
   icon?: string;
 };
 
-
-export type Family = {
-  id: number;
-  name: string;
-  membersIds?: number[];
-  postsIds?: number[];
-  challengesIds?: number[];
+// API Response types
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
 };
 
-export type Post = {
-  id: number;
-  userId: number;
-  familyId?: number;
-  caption?: string;
-  image?: string;
-  likes?: number;
-  timestamp?: string;
-};
-
-export type Coupon = {
-  id: number;
-  title: string;
-  image?: string;
-  description?: string;
-  scoreRequired?: number;
-  validUntil?: string;
+export type PaginatedResponse<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 };

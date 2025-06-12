@@ -13,7 +13,7 @@ interface AuthResponse {
 export class AuthService {
   // Mock de usuários em memória
   private mockUsers: User[] = [
-    { id: 1, name: 'André', email: 'andre@gmail.com', password: '12345', role: 'user' },
+    { id: 1, name: 'André', email: 'andre@gmail.com', password: '123456', role: 'user' },
     { id: 2, name: 'Maria', email: 'maria@gmail.com', password: 'senha123', role: 'admin' },
     { id: 3, name: 'João', email: 'joao@gmail.com', password: 'abc123', role: 'user' },
   ];

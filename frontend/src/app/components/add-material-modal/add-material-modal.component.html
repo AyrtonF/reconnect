@@ -1,0 +1,68 @@
+<ion-content class="ion-padding">
+  <div class="modal-container">
+    <h2>Adicionar Documento</h2>
+
+    <!-- Área de upload -->
+    <div class="upload-area" (click)="selectDocument()" [class.has-file]="selectedFile">
+      <div class="upload-content">
+        <ion-icon name="document-outline" *ngIf="!selectedFile"></ion-icon>
+        <ion-icon name="checkmark-circle-outline" *ngIf="selectedFile"></ion-icon>
+        
+        <p *ngIf="!selectedFile">Clique para selecionar um documento</p>
+        <p *ngIf="selectedFile" class="filename">
+          {{ materialData.filename }}
+          <ion-icon 
+            name="close-circle" 
+            (click)="removeDocument(); $event.stopPropagation()"
+            class="remove-icon">
+          </ion-icon>
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-container">
+      <div class="form-group">
+        <label>Nome do Material</label>
+        <ion-input
+          [(ngModel)]="materialData.title"
+          placeholder="Digite aqui o nome"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <ion-textarea
+          [(ngModel)]="materialData.description"
+          placeholder="Digite aqui a descrição"
+          rows="3"
+          class="custom-input">
+        </ion-textarea>
+      </div>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Botões -->
+    <div class="button-group">
+      <ion-button 
+        color="medium" 
+        (click)="cancel()" 
+        [disabled]="isSubmitting">
+        Cancelar
+      </ion-button>
+      
+      <ion-button 
+        color="warning" 
+        (click)="save()" 
+        [disabled]="isSubmitting">
+        <ion-spinner *ngIf="isSubmitting"></ion-spinner>
+        <span *ngIf="!isSubmitting">Salvar</span>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

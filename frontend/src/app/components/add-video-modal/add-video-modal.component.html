@@ -1,0 +1,68 @@
+<ion-content class="ion-padding">
+  <div class="modal-container">
+    <h2>Adicionar Video</h2>
+
+    <!-- Área de upload -->
+    <div class="upload-area" (click)="selectVideo()" [class.has-file]="selectedFile">
+      <div class="upload-content">
+        <ion-icon name="videocam-outline" *ngIf="!selectedFile"></ion-icon>
+        <ion-icon name="checkmark-circle-outline" *ngIf="selectedFile"></ion-icon>
+        
+        <p *ngIf="!selectedFile">Clique para selecionar um vídeo</p>
+        <p *ngIf="selectedFile" class="filename">
+          {{ videoData.filename }}
+          <ion-icon 
+            name="close-circle" 
+            (click)="removeVideo(); $event.stopPropagation()"
+            class="remove-icon">
+          </ion-icon>
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-container">
+      <div class="form-group">
+        <label>Nome do Vídeo</label>
+        <ion-input
+          [(ngModel)]="videoData.title"
+          placeholder="Digite aqui o nome"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <ion-textarea
+          [(ngModel)]="videoData.description"
+          placeholder="Digite aqui a descrição"
+          rows="3"
+          class="custom-input">
+        </ion-textarea>
+      </div>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Botões -->
+    <div class="button-group">
+      <ion-button 
+        color="medium" 
+        (click)="cancel()" 
+        [disabled]="isSubmitting">
+        Cancelar
+      </ion-button>
+      
+      <ion-button 
+        color="warning" 
+        (click)="save()" 
+        [disabled]="isSubmitting">
+        <ion-spinner *ngIf="isSubmitting"></ion-spinner>
+        <span *ngIf="!isSubmitting">Salvar</span>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button color="primary"></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h1 class="welcome-title">
+    Bem-vindo, <span class="brand-name">MenteStudy!</span>
+  </h1>
+
+  <ion-button expand="block" class="add-course-button" (click)="addNewCourse()">
+    <ion-icon name="add"></ion-icon>
+    Adicionar novo curso
+  </ion-button>
+
+  <h2 class="section-title">Cursos ativos:</h2>
+
+  <div class="search-container">
+    <ion-searchbar
+      mode="md"
+      [(ngModel)]="searchText"
+      (ionInput)="searchCourse($event)"
+      placeholder="Buscar curso..."
+      class="custom-searchbar"
+    >
+    </ion-searchbar>
+  </div>
+
+ <!-- ... resto do código ... -->
+
+<div class="course-list">
+  <ion-card *ngFor="let course of filteredCourses" class="course-card">
+    <div class="card-content">
+      <img [src]="course.image || 'assets/images/course-placeholder.jpg'" [alt]="course.name">
+      <div class="course-info">
+        <h3>{{ course.name }}</h3>
+        <p>{{ course.description }}</p>
+        <div class="action-buttons">
+          <ion-button color="primary" (click)="editCourse(course)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+          <ion-button color="danger" fill="outline" (click)="deleteCourse(course)">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Excluir
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ion-card>
+
+  <div class="empty-state" *ngIf="!isLoading && filteredCourses.length === 0">
+    <ion-icon name="school-outline"></ion-icon>
+    <p>Nenhum curso encontrado</p>
+  </div>
+</div>
+</ion-content>

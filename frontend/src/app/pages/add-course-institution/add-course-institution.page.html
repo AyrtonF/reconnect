@@ -1,0 +1,179 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/course-institution"
+        text=""
+        icon="chevron-back-outline"
+        color="success"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title color="success">Adicionar curso</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="course-form">
+    <!-- Image Upload Section -->
+    <div class="image-upload" (click)="uploadCourseImage()">
+      <div class="placeholder" *ngIf="!courseData.image">
+        <ion-icon name="camera-outline"></ion-icon>
+      </div>
+      <img [src]="courseData.image" *ngIf="courseData.image" />
+    </div>
+
+    <!-- Course Info Section -->
+    <div class="form-group">
+      <label>Nome do Curso</label>
+      <ion-input
+        [(ngModel)]="courseData.name"
+        placeholder="Digite aqui o nome"
+        class="custom-input"
+      >
+      </ion-input>
+    </div>
+
+    <div class="form-group">
+      <label>Descrição</label>
+      <ion-textarea
+        [(ngModel)]="courseData.description"
+        placeholder="Acrescente aqui a descrição do curso"
+        class="custom-textarea"
+        rows="4"
+      >
+      </ion-textarea>
+    </div>
+
+    <!-- Course Content Section -->
+    <div class="content-section">
+      <h2>Arquivos do curso</h2>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button
+          [class.active]="currentTab === 'VIDEOS'"
+          (click)="currentTab = 'VIDEOS'"
+        >
+          VIDEOS
+        </button>
+        <button
+          [class.active]="currentTab === 'MATERIAL'"
+          (click)="currentTab = 'MATERIAL'"
+        >
+          MATERIAL
+        </button>
+        <button
+          [class.active]="currentTab === 'QUIZZES'"
+          (click)="currentTab = 'QUIZZES'"
+        >
+          QUIZZES
+        </button>
+      </div>
+
+      <!-- Content based on selected tab -->
+      <div class="tab-content">
+        <!-- Videos Tab -->
+        <div *ngIf="currentTab === 'VIDEOS'">
+          <ion-button
+            expand="block"
+            class="add-button"
+            (click)="openVideoModal()"
+          >
+            <ion-icon name="add-outline"></ion-icon>
+            Adicionar vídeo
+          </ion-button>
+
+          <div class="items-list" *ngIf="courseData.videos.length > 0">
+            <div class="item" *ngFor="let video of courseData.videos">
+              <ion-icon name="videocam-outline"></ion-icon>
+              <div class="item-info">
+                <h3>{{ video.title }}</h3>
+                <p>{{ video.filename }}</p>
+              </div>
+              <div class="item-actions">
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="deleteVideo(video.id)"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Material Tab -->
+        <div *ngIf="currentTab === 'MATERIAL'">
+          <ion-button
+            expand="block"
+            class="add-button"
+            (click)="openMaterialModal()"
+          >
+            <ion-icon name="add-outline"></ion-icon>
+            Adicionar material
+          </ion-button>
+
+          <div class="items-list" *ngIf="courseData.materials.length > 0">
+            <div class="item" *ngFor="let material of courseData.materials">
+              <ion-icon name="document-outline"></ion-icon>
+              <div class="item-info">
+                <h3>{{ material.title }}</h3>
+                <p>{{ material.filename }}</p>
+              </div>
+              <div class="item-actions">
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="deleteMaterial(material.id)"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quizzes Tab -->
+        <div *ngIf="currentTab === 'QUIZZES'">
+          <ion-button
+            expand="block"
+            class="add-button"
+            (click)="openQuestionModal()"
+          >
+            <ion-icon name="add-outline"></ion-icon>
+            Adicionar pergunta
+          </ion-button>
+
+          <div class="questions-list" *ngIf="courseData.questions.length > 0">
+            <div class="question" *ngFor="let question of courseData.questions; let i = index">
+              <div class="question-header">
+                <p class="question-text">Pergunta {{ i + 1 }}: {{ question.question }}</p>
+                <ion-button fill="clear" color="danger" (click)="deleteQuestion(question.id)">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+              <div class="alternatives">
+                <button 
+                  *ngFor="let alt of question.alternatives; let j = index"
+                  [class.correct]="j === question.correctAnswer">
+                  {{ ['A', 'B', 'C', 'D'][j] }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <ion-button
+      expand="block"
+      color="success"
+      class="save-button"
+      (click)="saveCourse()"
+    >
+      Salvar
+    </ion-button>
+  </div>
+</ion-content>

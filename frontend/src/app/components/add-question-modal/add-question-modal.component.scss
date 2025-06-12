@@ -1,0 +1,158 @@
+.modal-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+
+  h2 {
+    color: #4CAF50;
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.form-container {
+  .form-group {
+    margin-bottom: 24px;
+
+    label {
+      display: block;
+      color: #333333;
+      margin-bottom: 12px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .custom-input {
+      --background: #F5F5F5;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+      --border-radius: 8px;
+      width: 100%;
+    }
+  }
+}
+
+.alternatives {
+  .alternative-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .alternative-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #F5F5F5;
+      border-radius: 8px;
+      padding: 8px 16px;
+      gap: 12px;
+
+      ion-radio {
+        margin: 0;
+        --color: #999999;
+        --color-checked: #4CAF50;
+      }
+
+      ion-input {
+        margin: 0;
+        --padding-start: 0;
+        --padding-end: 0;
+        --background: transparent;
+      }
+    }
+
+    .letter {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F5F5F5;
+      border-radius: 4px;
+      color: #666666;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &.correct {
+        background: #4CAF50;
+        color: white;
+      }
+    }
+  }
+}
+
+.error-message {
+  color: #F44336;
+  font-size: 14px;
+  margin: 16px 0;
+  text-align: center;
+  min-height: 20px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+
+  ion-button {
+    flex: 1;
+    margin: 0;
+    height: 44px;
+    font-size: 16px;
+    --border-radius: 8px;
+
+    &[color="warning"] {
+      --background: #FF9800;
+    }
+
+    &[color="medium"] {
+      --background: #757575;
+    }
+
+    ion-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Estilização global para o modal
+::ng-deep .course-modal {
+  --background: rgba(0, 0, 0, 0.4);
+  
+  .modal-wrapper {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Ajustes para telas menores
+@media (max-width: 480px) {
+  .modal-container {
+    padding: 16px;
+  }
+
+  .alternatives {
+    .alternative-item {
+      flex-direction: column;
+      gap: 8px;
+
+      .alternative-input {
+        width: 100%;
+      }
+
+      .letter {
+        align-self: flex-end;
+      }
+    }
+  }
+}

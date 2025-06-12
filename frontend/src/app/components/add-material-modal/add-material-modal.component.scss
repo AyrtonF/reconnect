@@ -1,0 +1,117 @@
+.modal-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+
+  h2 {
+    color: #4CAF50;
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.upload-area {
+  background: #F5F5F5;
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #EEEEEE;
+  }
+
+  &.has-file {
+    background: #E8F5E9;
+  }
+
+  .upload-content {
+    text-align: center;
+
+    ion-icon {
+      font-size: 32px;
+      color: #4CAF50;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0;
+      color: #666666;
+      font-size: 14px;
+
+      &.filename {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        .remove-icon {
+          color: #F44336;
+          font-size: 20px;
+          cursor: pointer;
+
+          &:hover {
+            color: #D32F2F;
+          }
+        }
+      }
+    }
+  }
+}
+
+.form-container {
+  .form-group {
+    margin-bottom: 16px;
+
+    label {
+      display: block;
+      color: #333333;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .custom-input {
+      --background: #F5F5F5;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+      --border-radius: 8px;
+      margin-top: 4px;
+    }
+  }
+}
+
+.error-message {
+  color: #F44336;
+  font-size: 14px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+
+  ion-button {
+    flex: 1;
+    margin: 0;
+    height: 44px;
+    font-size: 16px;
+    --border-radius: 8px;
+
+    &[color="warning"] {
+      --background: #FF9800;
+    }
+
+    ion-spinner {
+      margin-right: 8px;
+    }
+  }
+}

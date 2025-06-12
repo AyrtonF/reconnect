@@ -1,0 +1,64 @@
+<ion-content class="ion-padding">
+  <div class="modal-container">
+    <h2>Adicionar pergunta</h2>
+
+    <!-- Formulário -->
+    <div class="form-container">
+      <div class="form-group">
+        <label>PERGUNTA</label>
+        <ion-input
+          [value]="questionData.question"
+          (ionInput)="updateQuestion($event)"
+          placeholder="Digite aqui a pergunta"
+          class="custom-input">
+        </ion-input>
+      </div>
+
+      <div class="form-group">
+        <label>ALTERNATIVAS</label>
+        <div class="alternatives">
+          <div class="alternative-item" 
+               *ngFor="let alt of questionData.alternatives; let i = index; trackBy: trackByFn">
+            <div class="alternative-input">
+              <ion-radio-group [(ngModel)]="questionData.correctAnswer">
+                <ion-radio [value]="i"></ion-radio>
+              </ion-radio-group>
+              <ion-input 
+                [value]="alt"
+                (ionInput)="updateAlternative(i, $event)"
+                placeholder="Texto da alternativa"
+                class="custom-input">
+              </ion-input>
+            </div>
+            <div class="letter" [class.correct]="questionData.correctAnswer === i">
+              {{ ['A', 'B', 'C', 'D'][i] }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Botões -->
+    <div class="button-group">
+      <ion-button 
+        color="medium" 
+        (click)="cancel()" 
+        [disabled]="isSubmitting">
+        Cancelar
+      </ion-button>
+      
+      <ion-button 
+        color="warning" 
+        (click)="save()" 
+        [disabled]="isSubmitting">
+        <ion-spinner *ngIf="isSubmitting"></ion-spinner>
+        <span *ngIf="!isSubmitting">Salvar</span>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

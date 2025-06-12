@@ -59,7 +59,15 @@ const routes: Routes = [
   {
     path: 'profile',
     loadChildren: () => import('./pages/profile/profile.module').then( m => m.ProfilePageModule)
+  },  {
+    path: 'course-institution',
+    loadChildren: () => import('./pages/course-institution/course-institution.module').then( m => m.CourseInstitutionPageModule)
+  },
+  {
+    path: 'add-course-institution',
+    loadChildren: () => import('./pages/add-course-institution/add-course-institution.module').then( m => m.AddCourseInstitutionPageModule)
   }
+
 ];
 @NgModule({
   imports: [

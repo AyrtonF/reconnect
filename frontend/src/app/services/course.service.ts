@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Course, CourseModule, Video, TextMaterial, Quiz, Achievement, QuizAttempt } from '../models/types';
+import { 
+  StudentCourse as Course, 
+  CourseModule, 
+  StudentVideo as Video, 
+  TextMaterial, 
+  Quiz, 
+  Achievement, 
+  QuizAttempt 
+} from '../models/types';
 import { Observable, of } from 'rxjs';
 
 @Injectable({

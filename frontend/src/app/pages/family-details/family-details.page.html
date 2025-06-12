@@ -1,7 +1,6 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
       <ion-menu-button color="primary"></ion-menu-button>
     </ion-buttons>
     <ion-title class="green-text">FF - Familia Feliz</ion-title>
@@ -13,10 +12,16 @@
 
 <ion-content class="family-details-page">
   <div class="container">
+    <!-- Loading spinner -->
+    <div class="loading-container" *ngIf="isLoading">
+      <ion-spinner></ion-spinner>
+    </div>
+
+    <!-- Posts list -->
     <div class="post-card" *ngFor="let post of posts">
       <div class="user-info">
         <ion-avatar>
-          <img [src]="post.avatar" />
+          <img [src]="post.avatar" alt="User avatar"/>
         </ion-avatar>
         <div class="name-time">
           <h3>{{ post.name }}</h3>
@@ -24,14 +29,19 @@
         </div>
       </div>
 
-      <p class="caption">{{ post.caption }}</p>
+      <p class="caption" *ngIf="post.caption">{{ post.caption }}</p>
 
-      <img [src]="post.image" class="post-image" />
+      <img [src]="post.image" class="post-image" *ngIf="post.image"/>
 
       <div class="likes">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
         <span>{{ post.likes }}</span>
       </div>
+    </div>
+
+    <!-- No posts message -->
+    <div class="no-posts" *ngIf="!isLoading && posts.length === 0">
+      <p>Nenhuma publicação encontrada para esta família.</p>
     </div>
   </div>
 </ion-content>
