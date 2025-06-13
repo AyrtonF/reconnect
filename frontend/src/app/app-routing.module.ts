@@ -66,6 +66,14 @@ const routes: Routes = [
   {
     path: 'add-course-institution',
     loadChildren: () => import('./pages/add-course-institution/add-course-institution.module').then( m => m.AddCourseInstitutionPageModule)
+  },
+  {
+    path: 'home-company',
+    loadChildren: () => import('./pages/home-company/home-company.module').then( m => m.HomeCompanyPageModule)
+  },
+  {
+    path: 'add-coupon',
+    loadChildren: () => import('./pages/add-coupon/add-coupon.module').then( m => m.AddCouponPageModule)
   }
 
 ];

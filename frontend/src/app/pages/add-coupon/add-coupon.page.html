@@ -1,0 +1,78 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">Adicionar cupom</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="couponForm" (ngSubmit)="saveCoupon()">
+    
+    <div class="form-group">
+      <ion-label>Título do cupom</ion-label>
+      <ion-item class="custom-input" lines="none">
+        <ion-input formControlName="title" placeholder="Digite aqui o título"></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="titleControl && titleControl.touched && titleControl.errors?.['required']">
+        <small>O título é obrigatório</small>
+      </ion-text>
+    </div>
+    
+    <div class="form-group">
+      <ion-label>Descrição</ion-label>
+      <ion-item class="custom-input" lines="none">
+        <ion-textarea formControlName="description" placeholder="Acrescente aqui a descrição do cupom" rows="3"></ion-textarea>
+      </ion-item>
+      <ion-text color="danger" *ngIf="descriptionControl && descriptionControl.touched && descriptionControl.errors?.['required']">
+        <small>A descrição é obrigatória</small>
+      </ion-text>
+    </div>
+    
+    <div class="form-group">
+      <ion-label>Pontuação necessária</ion-label>
+      <ion-item class="custom-input" lines="none">
+        <ion-input formControlName="scoreRequired" type="number" min="0" placeholder="Pontos necessários para resgate"></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="scoreRequiredControl && scoreRequiredControl.touched && scoreRequiredControl.errors?.['required']">
+        <small>A pontuação é obrigatória</small>
+      </ion-text>
+      <ion-text color="danger" *ngIf="scoreRequiredControl && scoreRequiredControl.touched && scoreRequiredControl.errors?.['min']">
+        <small>A pontuação deve ser um valor positivo</small>
+      </ion-text>
+    </div>
+
+    <div class="form-group">
+      <ion-label>Validade</ion-label>
+      <ion-item class="custom-input" lines="none">
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+      </ion-item>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime 
+            id="datetime" 
+            presentation="date" 
+            formControlName="validUntil"
+            [min]="today"
+            locale="pt-BR">
+          </ion-datetime>
+        </ng-template>
+      </ion-modal>
+      <ion-text color="danger" *ngIf="validUntilControl && validUntilControl.touched && validUntilControl.errors?.['required']">
+        <small>A data de validade é obrigatória</small>
+      </ion-text>
+    </div>
+    
+    <div class="submit-button-container">
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="save-button">
+        Salvar
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

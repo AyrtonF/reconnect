@@ -1,0 +1,85 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshCoupons($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="welcome-header">
+    <h1>Bem-vindo, <span class="company-name">{{ companyName }}</span>!</h1>
+  </div>
+
+  <div class="add-coupon-container">
+    <ion-button expand="block" class="add-coupon-btn" (click)="addCoupon()">
+      <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+      Adicionar cupom
+    </ion-button>
+  </div>
+
+  <div class="coupons-section">
+    <h2>Cupons ativos:</h2>
+    
+    <div class="search-container">
+      <ion-searchbar placeholder="Buscar cupom..." [(ngModel)]="searchTerm"></ion-searchbar>
+    </div>
+
+    <ng-container *ngIf="!loading; else loadingTemplate">
+      <ng-container *ngIf="coupons.length > 0; else noCouponsTemplate">
+        <div class="coupon-list">
+          <div class="coupon-card" *ngFor="let coupon of filterCoupons()" [class.expired]="isCouponExpired(coupon)">
+            <div class="coupon-header">
+              <div class="coupon-image" [style.backgroundImage]="'url(' + (coupon.image || '../../../assets/images/cinemark.png') + ')'"></div>
+            </div>
+            <div class="coupon-content">
+              <div class="coupon-details">
+                <h3>{{ coupon.title }}</h3>
+                <p class="description">{{ coupon.description }}</p>
+                <div class="coupon-info">
+                  <p class="score" *ngIf="coupon.scoreRequired">
+                    <ion-icon name="star-outline"></ion-icon>
+                    {{ getCouponScoreLabel(coupon) }}
+                  </p>
+                  <p class="expiration" [class.expired]="isCouponExpired(coupon)">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    {{ getExpirationLabel(coupon) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="coupon-actions">
+              <ion-button class="edit-btn" fill="clear" (click)="editCoupon(coupon)">
+                <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                <span>Editar</span>
+              </ion-button>
+              <ion-button class="delete-btn" fill="clear" (click)="deleteCoupon(coupon)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                <span>Excluir</span>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+    
+    <ng-template #loadingTemplate>
+      <div class="loading-container">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Carregando cupons...</p>
+      </div>
+    </ng-template>
+    
+    <ng-template #noCouponsTemplate>
+      <div class="no-coupons-container">
+        <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
+        <h3>Nenhum cupom encontrado</h3>
+        <p>Adicione seu primeiro cupom clicando no botão acima.</p>
+      </div>
+    </ng-template>
+  </div>
+</ion-content>

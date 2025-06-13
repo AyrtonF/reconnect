@@ -147,7 +147,6 @@ export type Coupon = {
   scoreRequired?: number;
   validUntil?: string;
 };
-
 // Student course types (for consuming courses)
 export type StudentCourse = {
   id: number;
