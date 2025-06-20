@@ -28,6 +28,7 @@ public class CourseModule {
     @Column(length = 1000)
     private String description;
 
+    @Column(name = "module_order")
     private Integer order;
 
     @Embedded
