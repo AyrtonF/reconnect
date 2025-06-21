@@ -1,5 +1,5 @@
+// src/main/java/com/nassau/reconnect/security/JwtTokenProvider.java
 package com.nassau.reconnect.security;
-
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -35,7 +35,8 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
-                .setIssuedAt(new Date())
+                .claim("userId", userPrincipal.getId()) // Inclui o claim userId
+                .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
@@ -49,6 +50,20 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public Long getUserIdFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Object userIdObj = claims.get("userId");
+        if (userIdObj == null) {
+            throw new IllegalArgumentException("userId claim não encontrado no token JWT");
+        }
+        return Long.parseLong(userIdObj.toString());
     }
 
     public boolean validateToken(String authToken) {

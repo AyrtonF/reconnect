@@ -5,7 +5,9 @@ import com.nassau.reconnect.dtos.ApiResponse;
 import com.nassau.reconnect.dtos.user.UserCreateDto;
 import com.nassau.reconnect.dtos.user.UserDto;
 import com.nassau.reconnect.dtos.user.UserUpdateDto;
+import com.nassau.reconnect.security.JwtTokenProvider;
 import com.nassau.reconnect.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTITUTION_ADMIN')")
@@ -35,6 +38,16 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable Long id) {
         UserDto user = userService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(user));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER') or hasRole('INSTITUTION_ADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = authorizationHeader.substring(7);
+        Long id = jwtTokenProvider.getUserIdFromJWT(token);
+        UserDto currentUser = userService.getUserById(id);
+        return ResponseEntity.ok(ApiResponse.success(currentUser));
     }
 
     @GetMapping("/institution/{institutionId}")
