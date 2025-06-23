@@ -8,14 +8,18 @@ import { SideMenuComponentModule } from './components/side-menu/side-menu.module
 import { AddVideoModalComponent } from './components/add-video-modal/add-video-modal.component';
 import { AddQuestionModalComponent } from './components/add-question-modal/add-question-modal.component';
 import { AddMaterialModalComponent } from './components/add-material-modal/add-material-modal.component';
+import { HttpClientModule } from '@angular/common/http';
+
+
 
 @NgModule({
-  declarations: [AppComponent,],
+  declarations: [AppComponent, ],
   imports: [
     BrowserModule, 
     IonicModule.forRoot(), 
     AppRoutingModule,
-    SideMenuComponentModule 
+    SideMenuComponentModule,
+    HttpClientModule 
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }

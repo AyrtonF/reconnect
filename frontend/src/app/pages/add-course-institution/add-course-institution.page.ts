@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AppComponent } from 'src/app/app.component';
 import { AlertController, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { AddVideoModalComponent } from '../../components/add-video-modal/add-video-modal.component';
 import { AddMaterialModalComponent } from '../../components/add-material-modal/add-material-modal.component';
@@ -6,6 +7,8 @@ import { AddQuestionModalComponent } from '../../components/add-question-modal/a
 import { Router } from '@angular/router';
 import { CourseInstitutionService } from 'src/app/services/course-institution.service';
 import { InstitutionCourse, InstitutionMaterial, InstitutionQuestion, InstitutionVideo } from 'src/app/models/types';
+import { CloudinaryService } from '../../services/cloudnary.service';
+
 interface Course {
   image: string | null;
   name: string;
@@ -43,7 +46,7 @@ interface Question {
   standalone: false
 })
 export class AddCourseInstitutionPage implements OnInit {
-currentTab: 'VIDEOS' | 'MATERIAL' | 'QUIZZES' = 'VIDEOS';
+  currentTab: 'VIDEOS' | 'MATERIAL' | 'QUIZZES' = 'VIDEOS';
   courseData: Course = {
     image: null,
     name: '',
@@ -59,25 +62,25 @@ currentTab: 'VIDEOS' | 'MATERIAL' | 'QUIZZES' = 'VIDEOS';
     private toastController: ToastController,
     private loadingController: LoadingController,
     private router: Router,
-     private courseService: CourseInstitutionService 
-
+    private courseService: CourseInstitutionService,
+    private cloudinaryService: CloudinaryService
   ) {}
 
   ngOnInit() {}
 
-  // Implementação do upload de imagem
+  // Implementação do upload de imagem consumindo o CloudinaryService
   async uploadCourseImage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    
+
     input.onchange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
       const files = target.files;
 
       if (files && files.length > 0) {
         const file = files[0];
-        
+
         // Verificar tamanho (5MB máximo)
         const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
@@ -85,16 +88,24 @@ currentTab: 'VIDEOS' | 'MATERIAL' | 'QUIZZES' = 'VIDEOS';
           return;
         }
 
+        let loading;
         try {
-          // Converter para base64
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.courseData.image = e.target?.result as string;
-          };
-          reader.readAsDataURL(file);
+          loading = await this.loadingController.create({
+            message: 'Enviando imagem...'
+          });
+          await loading.present();
+
+          // Consome CloudinaryService ao invés do FileReader
+          const imageUrl = await this.cloudinaryService.uploadImage(file);
+          this.courseData.image = imageUrl;
+          await this.showToast('Imagem enviada com sucesso!');
         } catch (error) {
-          console.error('Erro ao processar imagem:', error);
-          await this.showToast('Erro ao processar a imagem. Tente novamente.');
+          console.error('Erro ao enviar imagem:', error);
+          await this.showToast('Erro ao enviar a imagem. Tente novamente.');
+        } finally {
+          if (loading) {
+            await loading.dismiss();
+          }
         }
       }
     };
@@ -223,7 +234,7 @@ currentTab: 'VIDEOS' | 'MATERIAL' | 'QUIZZES' = 'VIDEOS';
     await toast.present();
   }
 
- async saveCourse() {
+  async saveCourse() {
     try {
       if (!this.courseData.image) {
         await this.showToast('Por favor, adicione uma imagem para o curso');
