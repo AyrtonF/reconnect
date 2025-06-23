@@ -5,8 +5,10 @@ import com.nassau.reconnect.dtos.ApiResponse;
 import com.nassau.reconnect.dtos.user.UserCreateDto;
 import com.nassau.reconnect.dtos.user.UserDto;
 import com.nassau.reconnect.dtos.user.UserUpdateDto;
+import com.nassau.reconnect.models.enums.Role;
 import com.nassau.reconnect.security.JwtTokenProvider;
 import com.nassau.reconnect.services.UserService;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,22 @@ public class UserController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @PostConstruct
+    public void init() {
+        if (!userService.existsByEmail("admin@admin.com")) {
+            UserCreateDto user = new UserCreateDto(
+                    "Admin",
+                    "admin@admin.com",
+                    "admin1234",
+                    Role.ADMIN,
+                    null,
+                    null,
+                    null
+            );
+            userService.createUser(user);
+        }
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTITUTION_ADMIN')")
