@@ -82,17 +82,6 @@ togglePasswordVisibility() {
     }
   }
 
-   private validatePhone(phone: string): boolean {
-    // Remove todos os caracteres não numéricos
-    const numbers = phone.replace(/\D/g, '');
-    
-    // Verifica se tem 10 ou 11 dígitos (com ou sem 9)
-    if (numbers.length !== 11 && numbers.length !== 10) {
-      this.presentToast('Digite um número de telefone válido', 'warning');
-      return false;
-    }
-    return true;
-  }
 
 private validateForm(): boolean {
     if (!this.name || !this.email || !this.password || !this.phone) {
@@ -105,9 +94,6 @@ private validateForm(): boolean {
       return false;
     }
 
-    if (!this.validatePhone(this.phone)) {
-      return false;
-    }
 
     if (this.password.length < 6) {
       this.presentToast('A senha deve ter pelo menos 6 caracteres', 'warning');
