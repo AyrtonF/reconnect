@@ -40,13 +40,22 @@ export class HomeCompanyPage implements OnInit {
   }
 
   async loadCurrentUser() {
-    // Vamos buscar o primeiro usuário institucional como exemplo
-    this.userService.getInstitutionalUsers().subscribe((users) => {
-      if (users.length > 0) {
-        this.currentUser = users[0];
+    try {
+      const user = await this.authService.getCurrentUser().toPromise();
+      if (user) {
+        this.currentUser = user as InstitutionalUser;
         this.companyName = this.getCompanyName();
       }
-    });
+    } catch (error) {
+      console.error('Erro ao carregar usuário atual:', error);
+      // Se falhar, tenta buscar o primeiro usuário institucional como fallback
+      this.userService.getInstitutionalUsers().subscribe((users) => {
+        if (users.length > 0) {
+          this.currentUser = users[0];
+          this.companyName = this.getCompanyName();
+        }
+      });
+    }
   }
 
   getCompanyName(): string {

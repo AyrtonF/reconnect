@@ -11,6 +11,7 @@ import { AddVideoModalComponent } from './components/add-video-modal/add-video-m
 import { AddQuestionModalComponent } from './components/add-question-modal/add-question-modal.component';
 import { AddMaterialModalComponent } from './components/add-material-modal/add-material-modal.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { ErrorInterceptor } from './interceptors/error.interceptor';
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,6 +25,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
 })

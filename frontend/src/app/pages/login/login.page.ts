@@ -7,7 +7,7 @@ import { AlertController, LoadingController } from '@ionic/angular';
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class LoginPage {
   email = '';
@@ -16,7 +16,7 @@ export class LoginPage {
 
   constructor(
     private navCtrl: NavController,
-    private authService: AuthService, 
+    private authService: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController
   ) {}
@@ -34,7 +34,7 @@ export class LoginPage {
 
     const loading = await this.loadingController.create({
       message: 'Fazendo login...',
-      spinner: 'circular'
+      spinner: 'circular',
     });
     await loading.present();
 
@@ -42,20 +42,39 @@ export class LoginPage {
       next: async (response) => {
         await loading.dismiss();
         console.log('Login bem-sucedido:', response);
-        
+
         // Usar os métodos do serviço para salvar os dados
         this.authService.saveToken(response.token);
         this.authService.saveUserRole(response.role);
-        
-        // Redirecionar baseado no role usando o método do serviço
-        const redirectRoute = this.authService.getRedirectRoute(response.role);
-        this.navCtrl.navigateRoot(redirectRoute);
+
+        // Obter dados do usuário para salvar o ID
+        this.authService.getCurrentUser().subscribe({
+          next: (user) => {
+            if (user?.id) {
+              this.authService.saveUserId(user.id);
+            }
+
+            // Redirecionar baseado no role
+            const redirectRoute = this.authService.getRedirectRoute(
+              response.role
+            );
+            this.navCtrl.navigateRoot(redirectRoute);
+          },
+          error: (error) => {
+            console.warn('Não foi possível obter dados do usuário:', error);
+            // Mesmo assim, redireciona
+            const redirectRoute = this.authService.getRedirectRoute(
+              response.role
+            );
+            this.navCtrl.navigateRoot(redirectRoute);
+          },
+        });
       },
       error: async (error) => {
         await loading.dismiss();
         console.error('Erro no login:', error);
         await this.showAlert('Erro de Login', error.message);
-      }
+      },
     });
   }
 
@@ -63,7 +82,7 @@ export class LoginPage {
     const alert = await this.alertController.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -71,8 +90,6 @@ export class LoginPage {
   goToSignUp() {
     this.navCtrl.navigateForward('/register');
   }
-
-
 
   goBack() {
     this.navCtrl.back();

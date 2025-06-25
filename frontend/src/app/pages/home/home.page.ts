@@ -10,7 +10,7 @@ import { navigate } from 'src/app/functions/navigate';
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class HomePage implements OnInit {
   username = '';
@@ -40,7 +40,7 @@ export class HomePage implements OnInit {
       return;
     }
 
-    this.userService.getCurrentUser().subscribe({
+    this.authService.getCurrentUser().subscribe({
       next: (user) => {
         this.currentUser = user;
         this.username = user.name || 'Usuário';
@@ -51,29 +51,36 @@ export class HomePage implements OnInit {
       error: async (error) => {
         console.error('Erro ao carregar dados do usuário:', error);
         this.loading = false;
-        
-        if (error.message.includes('Token inválido') || error.message.includes('não autorizado')) {
+
+        if (
+          error.message.includes('Token inválido') ||
+          error.message.includes('não autorizado')
+        ) {
           // Token inválido, redireciona para login
-          await this.showAlert('Sessão Expirada', 'Sua sessão expirou. Faça login novamente.');
+          await this.showAlert(
+            'Sessão Expirada',
+            'Sua sessão expirou. Faça login novamente.'
+          );
+          this.authService.logout();
           this.navCtrl.navigateRoot('/login');
         } else {
           await this.showAlert('Erro', 'Erro ao carregar dados do usuário');
         }
-      }
+      },
     });
   }
 
   loadInProgressCourses() {
     this.courseService.getAllCourses().subscribe({
       next: (courses) => {
-        this.inProgressCourses = courses.filter(course => 
-          course.isEnrolled && 
-          course.progress?.status === 'in_progress'
+        this.inProgressCourses = courses.filter(
+          (course) =>
+            course.isEnrolled && course.progress?.status === 'in_progress'
         );
       },
       error: (error) => {
         console.error('Erro ao carregar cursos:', error);
-      }
+      },
     });
   }
 
@@ -81,7 +88,7 @@ export class HomePage implements OnInit {
     const alert = await this.alertController.create({
       header: header,
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -94,7 +101,7 @@ export class HomePage implements OnInit {
     const actualId = courseId > 1000 ? courseId - 1000 : courseId;
     const type = courseId > 1000 ? 'institutional' : 'regular';
     this.navCtrl.navigateForward(`/course-details/${actualId}`, {
-      queryParams: { type }
+      queryParams: { type },
     });
   }
 
@@ -102,7 +109,7 @@ export class HomePage implements OnInit {
   doRefresh(event: any) {
     this.loadCurrentUserData();
     this.loadInProgressCourses();
-    
+
     // Simula um delay para o refresh
     setTimeout(() => {
       event.target.complete();

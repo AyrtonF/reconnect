@@ -72,9 +72,9 @@ export class PostService {
 
   likePost(postId: number, userId: number): Observable<boolean> {
     return this.http
-      .post<ApiResponse<boolean>>(`${this.apiUrl}/${postId}/like/${userId}`, {})
+      .post<ApiResponse<number>>(`${this.apiUrl}/${postId}/like/${userId}`, {})
       .pipe(
-        map((response) => response.data || false),
+        map((response) => response.success || false),
         catchError(this.errorHandler.handleError)
       );
   }

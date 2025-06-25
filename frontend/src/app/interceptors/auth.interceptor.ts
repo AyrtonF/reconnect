@@ -19,9 +19,10 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.authService.getToken();
 
     if (token) {
+      // O AuthService já retorna o token com "Bearer " prefixo
       request = request.clone({
         setHeaders: {
-          Authorization: `Bearer ${token}`,
+          Authorization: token,
         },
       });
     }

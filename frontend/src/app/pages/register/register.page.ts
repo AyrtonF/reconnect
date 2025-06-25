@@ -11,7 +11,7 @@ import { provideNgxMask } from 'ngx-mask';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: false,
-  providers: [provideNgxMask()]
+  providers: [provideNgxMask()],
 })
 export class RegisterPage {
   name: string = '';
@@ -21,7 +21,7 @@ export class RegisterPage {
   isLoading: boolean = false;
   showPassword: boolean = false;
 
-   phoneNumberMask = '(00) 00000-0000';
+  phoneNumberMask = '(00) 00000-0000';
 
   constructor(
     private navCtrl: NavController,
@@ -31,7 +31,7 @@ export class RegisterPage {
     private router: Router
   ) {}
 
-togglePasswordVisibility() {
+  togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
 
@@ -43,34 +43,23 @@ togglePasswordVisibility() {
     this.isLoading = true;
 
     try {
-      // Primeiro registra o usuário através do AuthService
-      const authResponse = await this.authService.register(
-        this.name,
-        this.email,
-        this.password
-      ).toPromise();
+      // Registra o usuário através do AuthService
+      const authResponse = await this.authService
+        .register(this.name, this.email, this.password)
+        .toPromise();
 
       if (authResponse) {
-        // Cria um usuário mais completo com o UserService
-        const newUser = {
-          id: 0, 
-          name: this.name,
-          email: this.email,
-          password: this.password,
-          role: 'user',
-          phone: this.phone,
-          score: 0,
-          coursesIds: [],
-          familyIds: [],
-          challengesCompletedIds: [],
-          pendingChallengesIds: [],
-          couponsIds: []
-        };
-
-        await this.userService.addUser(newUser).toPromise();
-
         await this.presentToast('Cadastro realizado com sucesso!', 'success');
-        this.router.navigate(['/login']);
+
+        // Salva os dados de autenticação
+        this.authService.saveToken(authResponse.token);
+        this.authService.saveUserRole(authResponse.role);
+
+        // Redireciona baseado no role
+        const redirectRoute = this.authService.getRedirectRoute(
+          authResponse.role
+        );
+        this.router.navigate([redirectRoute]);
       }
     } catch (error: any) {
       await this.presentToast(
@@ -82,8 +71,7 @@ togglePasswordVisibility() {
     }
   }
 
-
-private validateForm(): boolean {
+  private validateForm(): boolean {
     if (!this.name || !this.email || !this.password || !this.phone) {
       this.presentToast('Por favor, preencha todos os campos', 'warning');
       return false;
@@ -93,7 +81,6 @@ private validateForm(): boolean {
       this.presentToast('Por favor, insira um email válido', 'warning');
       return false;
     }
-
 
     if (this.password.length < 6) {
       this.presentToast('A senha deve ter pelo menos 6 caracteres', 'warning');
@@ -108,12 +95,15 @@ private validateForm(): boolean {
     return re.test(email);
   }
 
-  private async presentToast(message: string, color: 'success' | 'danger' | 'warning') {
+  private async presentToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning'
+  ) {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
       color,
-      position: 'top'
+      position: 'top',
     });
     toast.present();
   }

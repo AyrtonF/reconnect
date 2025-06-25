@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { MenuController } from '@ionic/angular';
+import { MenuController, Platform } from '@ionic/angular';
 import { MenuService } from './services/menu.service';
-import { filter } from 'rxjs/operators'; // Adicione esta importação
+import { InitializationService } from './services/initialization.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -10,29 +11,40 @@ import { filter } from 'rxjs/operators'; // Adicione esta importação
   styleUrls: ['app.component.scss'],
   standalone: false,
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   showMenu = false;
 
   constructor(
     private menuController: MenuController,
     private router: Router,
-    private menuService: MenuService
+    private menuService: MenuService,
+    private platform: Platform,
+    private initializationService: InitializationService
   ) {
     this.setupMenuVisibility();
   }
 
+  async ngOnInit() {
+    await this.platform.ready();
+    await this.initializationService.initialize();
+  }
+
   private setupMenuVisibility() {
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
-    ).subscribe((event) => {
-      const shouldShow = this.menuService.shouldShowMenu(event.url);
-      this.showMenu = shouldShow;
-      if (!shouldShow) {
-        this.menuController.enable(false);
-      } else {
-        this.menuController.enable(true);
-      }
-    });
+    this.router.events
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd
+        )
+      )
+      .subscribe((event) => {
+        const shouldShow = this.menuService.shouldShowMenu(event.url);
+        this.showMenu = shouldShow;
+        if (!shouldShow) {
+          this.menuController.enable(false);
+        } else {
+          this.menuController.enable(true);
+        }
+      });
   }
 
   closeMenu() {

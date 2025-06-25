@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiResponse } from '../models/types';
+import { environment } from '../../environments/environment';
 
 interface AuthResponse {
   token: string;
@@ -229,7 +230,11 @@ export class AuthService {
 
   // Método para obter o token do localStorage
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
+    if (token && !token.startsWith('Bearer ')) {
+      return `Bearer ${token}`;
+    }
+    return token;
   }
 
   // Método para salvar o role do usuário
@@ -255,16 +260,19 @@ export class AuthService {
 
   // Método para obter informações do usuário atual do backend
   getCurrentUser(): Observable<any> {
-    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/me`).pipe(
-      map((response) => response.data),
-      catchError(this.handleError)
-    );
+    return this.http
+      .get<ApiResponse<any>>(`${environment.apiUrl}/users/me`)
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   // Método para remover dados de autenticação
   logout(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
   }
 
   // Método para verificar se o usuário está logado
@@ -298,10 +306,18 @@ export class AuthService {
 
     let errorMessage = 'Erro desconhecido';
 
-    if (error.error?.message) {
+    if (error.error?.error) {
+      errorMessage = error.error.error;
+    } else if (error.error?.message) {
       errorMessage = error.error.message;
     } else if (error.message) {
       errorMessage = error.message;
+    } else if (error.status === 0) {
+      errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+    } else if (error.status === 401) {
+      errorMessage = 'Token inválido ou expirado';
+    } else if (error.status === 403) {
+      errorMessage = 'Acesso negado';
     }
 
     return throwError(() => new Error(errorMessage));

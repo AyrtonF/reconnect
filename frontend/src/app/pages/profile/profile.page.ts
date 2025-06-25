@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { AlertController, ToastController } from '@ionic/angular';
 import { User } from '../../models/types';
 
@@ -7,23 +8,24 @@ import { User } from '../../models/types';
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  standalone:false
+  standalone: false,
 })
 export class ProfilePage implements OnInit {
   user: User | undefined;
   isEditing = {
     email: false,
     phone: false,
-    password: false
+    password: false,
   };
   editValues = {
     email: '',
     phone: '',
-    password: ''
+    password: '',
   };
 
   constructor(
     private userService: UserService,
+    private authService: AuthService,
     private alertController: AlertController,
     private toastController: ToastController
   ) {}
@@ -33,25 +35,37 @@ export class ProfilePage implements OnInit {
   }
 
   loadUserProfile() {
-    // Usando ID 1 como exemplo para o usuário logado
-    this.userService.getUserById(1).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.editValues = {
-          email: user.email,
-          phone: user.phone || '',
-          password: user.password || ''
-        };
-      }
+    this.userService.getCurrentUser().subscribe({
+      next: (user) => {
+        if (user) {
+          this.user = user;
+          this.editValues = {
+            email: user.email,
+            phone: user.phone || '',
+            password: '',
+          };
+        }
+      },
+      error: async (error) => {
+        console.error('Erro ao carregar perfil:', error);
+        const toast = await this.toastController.create({
+          message: 'Erro ao carregar dados do perfil',
+          duration: 3000,
+          color: 'danger',
+          position: 'top',
+        });
+        toast.present();
+      },
     });
   }
 
   toggleEdit(field: 'email' | 'phone' | 'password') {
     this.isEditing[field] = !this.isEditing[field];
     if (!this.isEditing[field] && this.user) {
-      this.editValues[field] = field === 'password' ? 
-        this.user.password || '' : 
-        this.user[field] || '';
+      this.editValues[field] =
+        field === 'password'
+          ? this.user.password || ''
+          : this.user[field] || '';
     }
   }
 
@@ -60,10 +74,10 @@ export class ProfilePage implements OnInit {
 
     const updatedUser: User = {
       ...this.user,
-      [field]: this.editValues[field]
+      [field]: this.editValues[field],
     };
 
-    this.userService.updateUser(updatedUser).subscribe(async result => {
+    this.userService.updateUser(updatedUser).subscribe(async (result) => {
       if (result) {
         this.user = result;
         this.isEditing[field] = false;
@@ -71,7 +85,7 @@ export class ProfilePage implements OnInit {
           message: 'Atualizado com sucesso!',
           duration: 2000,
           color: 'success',
-          position: 'top'
+          position: 'top',
         });
         toast.present();
       }
@@ -87,19 +101,19 @@ export class ProfilePage implements OnInit {
           text: 'Câmera',
           handler: () => {
             // Implementar lógica da câmera
-          }
+          },
         },
         {
           text: 'Galeria',
           handler: () => {
             // Implementar lógica da galeria
-          }
+          },
         },
         {
           text: 'Cancelar',
-          role: 'cancel'
-        }
-      ]
+          role: 'cancel',
+        },
+      ],
     });
 
     await alert.present();
