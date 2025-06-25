@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiResponse } from '../models/types';
@@ -22,12 +22,12 @@ interface RegisterRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly apiUrl = 'http://localhost:8080/api/auth';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<AuthResponse> {
     // Validação básica no frontend
@@ -41,40 +41,48 @@ export class AuthService {
 
     const loginRequest: LoginRequest = {
       email: email.trim(),
-      password: password
+      password: password,
     };
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json',
     });
 
-    console.log('Enviando dados de login:', { email: loginRequest.email, password: '***' });
+    console.log('Enviando dados de login:', {
+      email: loginRequest.email,
+      password: '***',
+    });
 
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, loginRequest, { headers })
+    return this.http
+      .post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, loginRequest, {
+        headers,
+      })
       .pipe(
-        map(response => {
+        map((response) => {
           console.log('Resposta da API:', response);
-          
+
           if (response.success && response.data) {
             // Adiciona "Bearer " se não estiver presente no token
-            const token = response.data.token.startsWith('Bearer ') 
-              ? response.data.token 
+            const token = response.data.token.startsWith('Bearer ')
+              ? response.data.token
               : `Bearer ${response.data.token}`;
-            
+
             return {
               token: token,
-              role: response.data.role
+              role: response.data.role,
             };
           } else {
-            throw new Error(response.error || response.message || 'Login failed');
+            throw new Error(
+              response.error || response.message || 'Login failed'
+            );
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro completo da API:', error);
-          
+
           let errorMessage = 'Erro ao fazer login';
-          
+
           // Tratamento específico para erro 400
           if (error.status === 400) {
             if (error.error?.error) {
@@ -83,24 +91,33 @@ export class AuthService {
               errorMessage = error.error.message;
             } else if (error.error) {
               // Se o error for uma string
-              errorMessage = typeof error.error === 'string' ? error.error : 'Dados inválidos';
+              errorMessage =
+                typeof error.error === 'string'
+                  ? error.error
+                  : 'Dados inválidos';
             } else {
               errorMessage = 'Dados de login inválidos';
             }
           } else if (error.status === 401) {
             errorMessage = 'Credenciais inválidas';
           } else if (error.status === 0) {
-            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+            errorMessage =
+              'Erro de conexão. Verifique se o servidor está rodando.';
           } else {
             errorMessage = error.message || 'Erro desconhecido';
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
   }
 
-  register(name: string, email: string, password: string, role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' = 'USER'): Observable<AuthResponse> {
+  register(
+    name: string,
+    email: string,
+    password: string,
+    role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' = 'USER'
+  ): Observable<AuthResponse> {
     // Validação básica no frontend
     if (!name || !email || !password) {
       return throwError(() => new Error('Todos os campos são obrigatórios'));
@@ -111,52 +128,61 @@ export class AuthService {
     }
 
     if (password.length < 6) {
-      return throwError(() => new Error('A senha deve ter no mínimo 6 caracteres'));
+      return throwError(
+        () => new Error('A senha deve ter no mínimo 6 caracteres')
+      );
     }
 
     const registerRequest: RegisterRequest = {
       name: name.trim(),
       email: email.trim(),
       password: password,
-      role: role
+      role: role,
     };
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json',
     });
 
-    console.log('Enviando dados de registro:', { 
-      name: registerRequest.name, 
-      email: registerRequest.email, 
+    console.log('Enviando dados de registro:', {
+      name: registerRequest.name,
+      email: registerRequest.email,
       password: '***',
-      role: registerRequest.role 
+      role: registerRequest.role,
     });
 
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/register`, registerRequest, { headers })
+    return this.http
+      .post<ApiResponse<AuthResponse>>(
+        `${this.apiUrl}/register`,
+        registerRequest,
+        { headers }
+      )
       .pipe(
-        map(response => {
+        map((response) => {
           console.log('Resposta da API (registro):', response);
-          
+
           if (response.success && response.data) {
             // Adiciona "Bearer " se não estiver presente no token
-            const token = response.data.token.startsWith('Bearer ') 
-              ? response.data.token 
+            const token = response.data.token.startsWith('Bearer ')
+              ? response.data.token
               : `Bearer ${response.data.token}`;
-            
+
             return {
               token: token,
-              role: response.data.role
+              role: response.data.role,
             };
           } else {
-            throw new Error(response.error || response.message || 'Registration failed');
+            throw new Error(
+              response.error || response.message || 'Registration failed'
+            );
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro completo da API (registro):', error);
-          
+
           let errorMessage = 'Erro ao registrar usuário';
-          
+
           if (error.status === 400) {
             if (error.error?.error) {
               errorMessage = error.error.error;
@@ -166,11 +192,12 @@ export class AuthService {
               errorMessage = 'Dados de registro inválidos';
             }
           } else if (error.status === 0) {
-            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+            errorMessage =
+              'Erro de conexão. Verifique se o servidor está rodando.';
           } else {
             errorMessage = error.message || 'Erro desconhecido';
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -215,6 +242,25 @@ export class AuthService {
     return localStorage.getItem('userRole');
   }
 
+  // Método para salvar o ID do usuário
+  saveUserId(userId: number): void {
+    localStorage.setItem('userId', userId.toString());
+  }
+
+  // Método para obter o ID do usuário atual
+  getCurrentUserId(): number | null {
+    const userId = localStorage.getItem('userId');
+    return userId ? parseInt(userId, 10) : null;
+  }
+
+  // Método para obter informações do usuário atual do backend
+  getCurrentUser(): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/me`).pipe(
+      map((response) => response.data),
+      catchError(this.handleError)
+    );
+  }
+
   // Método para remover dados de autenticação
   logout(): void {
     localStorage.removeItem('authToken');
@@ -244,5 +290,20 @@ export class AuthService {
 
   isUser(): boolean {
     return this.hasRole('USER');
+  }
+
+  // Método para tratamento de erros genérico
+  private handleError(error: any): Observable<never> {
+    console.error('Erro completo da API:', error);
+
+    let errorMessage = 'Erro desconhecido';
+
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return throwError(() => new Error(errorMessage));
   }
 }

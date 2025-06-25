@@ -1,54 +1,125 @@
 import { Injectable } from '@angular/core';
-import { Family } from '../models/types';
-
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { Family, ApiResponse } from '../models/types';
+import { environment } from '../../environments/environment';
+import { ErrorHandlerService } from './error-handler.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FamilyService {
-  private families: Family[] = [
-    { id: 1, name: 'Familia Feliz', membersIds: [1, 2, 3], postsIds: [1, 2], challengesIds: [1, 2] },
-    { id: 2, name: 'Os Silvas', membersIds: [4, 5], postsIds: [3], challengesIds: [3] },
-    // Adicione mais famílias conforme necessário
-  ];
+  private apiUrl = `${environment.apiUrl}/families`;
 
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService,
+    private authService: AuthService
+  ) {}
 
   getAllFamilies(): Observable<Family[]> {
-    return of(this.families);
+    return this.http.get<ApiResponse<Family[]>>(`${this.apiUrl}`).pipe(
+      map((response) => response.data || []),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
-  getFamilyById(id: number): Observable<Family | undefined> {
-    const family = this.families.find(f => f.id === id);
-    return of(family);
+  getFamilyById(id: number): Observable<Family> {
+    return this.http.get<ApiResponse<Family>>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => response.data!),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
-  addFamily(family: Family): Observable<Family> {
-    family.id = this.generateId();
-    this.families.push(family);
-    return of(family);
+  getUserFamilies(userId: number): Observable<Family[]> {
+    return this.http
+      .get<ApiResponse<Family[]>>(`${this.apiUrl}/user/${userId}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  updateFamily(updatedFamily: Family): Observable<Family | undefined> {
-    const index = this.families.findIndex(f => f.id === updatedFamily.id);
-    if (index !== -1) {
-      this.families[index] = updatedFamily;
-      return of(updatedFamily);
+  searchFamiliesByName(name: string): Observable<Family[]> {
+    const params = new HttpParams().set('name', name);
+    return this.http
+      .get<ApiResponse<Family[]>>(`${this.apiUrl}/search`, { params })
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  addFamily(family: Omit<Family, 'id'>): Observable<Family> {
+    return this.http.post<ApiResponse<Family>>(`${this.apiUrl}`, family).pipe(
+      map((response) => response.data!),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  updateFamily(id: number, family: Omit<Family, 'id'>): Observable<Family> {
+    return this.http
+      .put<ApiResponse<Family>>(`${this.apiUrl}/${id}`, family)
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  deleteFamily(id: number): Observable<void> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`).pipe(
+      map(() => void 0),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  joinFamily(familyId: number, userId: number): Observable<boolean> {
+    return this.http
+      .post<ApiResponse<boolean>>(
+        `${this.apiUrl}/${familyId}/members/${userId}`,
+        {}
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  leaveFamily(familyId: number, userId: number): Observable<boolean> {
+    return this.http
+      .delete<ApiResponse<boolean>>(
+        `${this.apiUrl}/${familyId}/members/${userId}`
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  // Métodos de conveniência para trabalhar com o usuário atual
+  joinFamilyCurrentUser(familyId: number): Observable<boolean> {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      return throwError(() => new Error('User not authenticated'));
     }
-    return of(undefined);
+    return this.joinFamily(familyId, userId);
   }
 
-  deleteFamily(id: number): Observable<boolean> {
-    const initialLength = this.families.length;
-    this.families = this.families.filter(f => f.id !== id);
-    return of(this.families.length < initialLength);
-  }
-
-  private generateId(): number {
-    if (this.families.length === 0) {
-      return 1;
+  leaveFamilyCurrentUser(familyId: number): Observable<boolean> {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      return throwError(() => new Error('User not authenticated'));
     }
-    return Math.max(...this.families.map(f => f.id)) + 1;
+    return this.leaveFamily(familyId, userId);
+  }
+
+  getCurrentUserFamilies(): Observable<Family[]> {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.getUserFamilies(userId);
   }
 }

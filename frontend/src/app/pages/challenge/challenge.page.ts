@@ -4,22 +4,24 @@ import { UserService } from '../../services/user.service';
 import { Challenge } from '../../models/types';
 import { User } from '../../models/types';
 import { NavController } from '@ionic/angular';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-challenge',
   templateUrl: './challenge.page.html',
   styleUrls: ['./challenge.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class ChallengePage implements OnInit {
   userPoints: number = 0;
   challenges: Challenge[] = [];
-  loggedInUserId: number = 1; // Mock do ID do usuário logado
+  loggedInUserId: number = 1; // Será atualizado com o usuário real
 
   constructor(
     private challengeService: ChallengeService,
     private userService: UserService,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -28,17 +30,17 @@ export class ChallengePage implements OnInit {
   }
 
   loadChallenges() {
-    this.challengeService.getAllChallenges().subscribe(challenges => {
-      this.challenges = challenges.map(challenge => ({
+    this.challengeService.getAllChallenges().subscribe((challenges) => {
+      this.challenges = challenges.map((challenge) => ({
         ...challenge,
         buttonText: this.getButtonText(challenge),
-        status: this.getChallengeStatus(challenge)
+        status: this.getChallengeStatus(challenge),
       }));
     });
   }
 
   loadUserPoints() {
-    this.userService.getUserById(this.loggedInUserId).subscribe(user => {
+    this.userService.getUserById(this.loggedInUserId).subscribe((user) => {
       this.userPoints = user?.score || 0;
     });
   }
@@ -68,18 +70,19 @@ export class ChallengePage implements OnInit {
   }
 
   participateChallenge(challengeId: number) {
-    // Lógica para adicionar o usuário à lista de participantes do desafio
-    this.challengeService.getChallengeById(challengeId).subscribe(challenge => {
-      if (challenge && !challenge.participantsIds?.includes(this.loggedInUserId)) {
-        const updatedChallenge: Challenge = {
-          ...challenge,
-          participantsIds: [...(challenge.participantsIds || []), this.loggedInUserId]
-        };
-        this.challengeService.updateChallenge(updatedChallenge).subscribe(() => {
-          this.loadChallenges(); // Recarrega a lista de desafios após participar
-        });
-      }
-    });
+    // Lógica para participar do desafio usando a API
+    this.challengeService
+      .participateInChallenge(challengeId, this.loggedInUserId)
+      .subscribe(
+        (success) => {
+          if (success) {
+            this.loadChallenges(); // Recarrega a lista de desafios após participar
+          }
+        },
+        (error) => {
+          console.error('Erro ao participar do desafio:', error);
+        }
+      );
   }
 
   seeMoreChallenge(challengeId: number) {
@@ -88,7 +91,7 @@ export class ChallengePage implements OnInit {
     // Você pode usar o NavController aqui para navegar
   }
 
-   goHome() {
+  goHome() {
     this.navCtrl.navigateRoot('/home');
   }
   goChallengeDetails(challengeId: number) {

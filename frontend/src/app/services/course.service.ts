@@ -1,395 +1,309 @@
 import { Injectable } from '@angular/core';
-import { 
-  StudentCourse as Course, 
-  CourseModule, 
-  StudentVideo as Video, 
-  TextMaterial, 
-  Quiz, 
-  Achievement, 
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, combineLatest, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import {
+  StudentCourse as Course,
+  CourseModule,
+  StudentVideo as Video,
+  TextMaterial,
+  Quiz,
+  Achievement,
   QuizAttempt,
-  InstitutionCourse
+  InstitutionCourse,
+  ApiResponse,
 } from '../models/types';
-import { Observable, combineLatest, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CourseInstitutionService } from './course-institution.service';
+import { environment } from '../../environments/environment';
+import { ErrorHandlerService } from './error-handler.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CourseService {
-  private courses: Course[] = [
-    {
-      id: 1,
-      title: 'Os riscos da exposição à internet na adolescência',
-      description: 'Aprenda a identificar e prevenir os principais riscos da exposição de crianças e adolescentes na internet.',
-      instructor: 'Maria Silva',
-      thumbnail: '../../../assets/images/course1.png',
-      workload: 90,
-      category: 'Segurança Digital',
-      level: 'beginner',
-      price: 99.90,
-      isEnrolled: true,
-      enrollmentDate: new Date('2025-05-01'),
-      modules: [
-        {
-          id: 1,
-          title: 'Introdução à Segurança Digital',
-          description: 'Conceitos básicos de segurança na internet',
-          order: 1,
-          isLocked: false,
-          progress: 100,
-          content: {
-            videos: [
-              {
-                id: 1,
-                title: 'Fundamentos de Segurança Digital',
-                description: 'Aprenda os conceitos básicos',
-                duration: 1200,
-                url: 'assets/videos/aula1.mp4',
-                thumbnail: '../../../assets/images/course2.png',
-                isWatched: true,
-                watchedDuration: 1200,
-                lastWatchedAt: new Date('2025-05-10')
-              }
-            ],
-            textMaterials: [
-              {
-                id: 1,
-                title: 'Guia de Segurança Online',
-                content: 'Conteúdo detalhado sobre segurança...',
-                estimatedReadTime: 15,
-                isRead: true,
-                attachments: [
-                  {
-                    name: 'guia-pratico.pdf',
-                    url: 'assets/materials/guia-pratico.pdf',
-                    type: 'application/pdf'
-                  }
-                ]
-              }
-            ],
-            quizzes: [
-              {
-                id: 1,
-                title: 'Quiz - Fundamentos',
-                description: 'Teste seus conhecimentos',
-                questions: [
-                  {
-                    id: 1,
-                    text: 'Qual é a primeira medida de segurança online?',
-                    type: 'multiple_choice',
-                    options: ['Senha forte', 'Antivírus', 'Firewall'],
-                    correctAnswer: 0,
-                    points: 10
-                  }
-                ],
-                timeLimit: 15,
-                minimumScore: 70,
-                attempts: [],
-                isCompleted: false
-              }
-            ]
-          }
-        }
-      ],
-      progress: {
-        completed: 8,
-        total: 10,
-        percentageCompleted: 80,
-        lastAccessDate: new Date('2025-05-14'),
-        status: 'in_progress'
-      },
-      score: {
-        current: 150,
-        total: 200,
-        achievements: [
-          {
-            id: 1,
-            title: 'Primeiro Módulo Concluído',
-            description: 'Completou o primeiro módulo do curso',
-            points: 50,
-            earnedAt: new Date('2025-05-05'),
-            type: 'completion',
-            icon: 'assets/icons/achievement-module.png'
-          }
-        ]
-      },
-      createdAt: new Date('2025-01-01'),
-      updatedAt: new Date('2025-05-14'),
-      tags: ['segurança', 'internet', 'adolescentes'],
-      prerequisites: []
-    },
-    {
-      id: 2,
-      title: 'Segurança Digital para Crianças',
-      description: 'Curso voltado para crianças sobre segurança na internet.',
-      instructor: 'João Pereira',
-      thumbnail: '../../../assets/images/course2.png',
-      workload: 120,
-      category: 'Segurança Digital',
-      level: 'beginner',
-      price: 79.90,
-      isEnrolled: false,
-      enrollmentDate: new Date('2025-05-01'),
-      modules: [
-        {
-          id: 1,
-          title: 'Módulo 1 - Introdução à Segurança Digital',
-          description: 'Conceitos básicos de segurança na internet',
-          order: 1,
-          isLocked: true,
-          progress: 0,
-          content: {
-            videos: [],
-            textMaterials: [],
-            quizzes: []
-          }
-        }
-      ],
-      progress: {
-        completed: 0,
-        total: 10,
-        percentageCompleted: 0,
-        lastAccessDate: new Date('2025-05-14'),
-        status: 'not_started'
-      },
-      score: {
-        current: 0,
-        total: 100,
-        achievements: []
-      },
-      createdAt: new Date('2025-01-01'),
-      updatedAt: new Date('2025-05-14'),
-      tags: ['segurança', 'internet', 'crianças'],
-      prerequisites: []
-    }
-  ];
+  private apiUrl = `${environment.apiUrl}/courses`;
+  private institutionApiUrl = `${environment.apiUrl}/institution-courses`;
 
-  constructor(private courseInstitutionService: CourseInstitutionService) {}
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService,
+    private authService: AuthService
+  ) {}
 
+  // Métodos para Student Courses
   getAllCourses(): Observable<Course[]> {
     return combineLatest([
-      of(this.courses),
-      this.courseInstitutionService.getCourses()
+      this.getStudentCourses(),
+      this.getInstitutionCourses(),
     ]).pipe(
-      map(([regularCourses, institutionalCourses]) => {
-        const convertedInstitutionalCourses: Course[] = institutionalCourses.map(instCourse => ({
-          id: instCourse.id + 1000, // Evitar conflito de IDs
-          title: instCourse.name,
-          description: instCourse.description,
-          instructor: 'Instrutor Institucional',
-          thumbnail: instCourse.image || '../../../assets/images/course-placeholder.jpg',
-          workload: 0,
-          category: 'Institucional',
-          level: 'beginner',
-          price: 0,
-          isEnrolled: false,
-          enrollmentDate: instCourse.createdAt,
-          modules: [],
-          progress: {
-            completed: 0,
-            total: 0,
-            percentageCompleted: 0,
-            lastAccessDate: new Date(),
-            status: 'not_started'
-          },
-          score: {
-            current: 0,
-            total: 0,
-            achievements: []
-          },
-          createdAt: instCourse.createdAt,
-          updatedAt: instCourse.updatedAt,
-          tags: [],
-          prerequisites: []
-        }));
-
-        return [...regularCourses, ...convertedInstitutionalCourses].sort((a, b) => 
-          b.createdAt.getTime() - a.createdAt.getTime()
+      map(([studentCourses, institutionCourses]) => {
+        const convertedInstitutionalCourses: Course[] = institutionCourses.map(
+          (instCourse) => this.convertInstitutionToStudentCourse(instCourse)
         );
-      })
+        return [...studentCourses, ...convertedInstitutionalCourses].sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        );
+      }),
+      catchError(this.errorHandler.handleError)
     );
   }
 
-  enrollInCourse(courseId: number): Observable<Course | undefined> {
-  const course = this.courses.find(c => c.id === courseId);
-  if (!course) return of(undefined);
+  getStudentCourses(): Observable<Course[]> {
+    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}`).pipe(
+      map((response) => response.data || []),
+      catchError(this.errorHandler.handleError)
+    );
+  }
 
-  course.isEnrolled = true;
-  course.enrollmentDate = new Date();
-  course.progress = {
-    completed: 0,
-    total: this.calculateTotalItems(course),
-    percentageCompleted: 0,
-    lastAccessDate: new Date(),
-    status: 'in_progress'
-  };
-
-  return this.updateCourse(course);
-}
-
-  getCourseById(id: number): Observable<Course | undefined> {
-    // Se o ID é maior que 1000, é um curso institucional
-    if (id > 1000) {
-      return this.courseInstitutionService.getCourseById(id - 1000).pipe(
-        map(response => {
-          if (!response.success || !response.data) return undefined;
-          const instCourse = response.data;
-          return {
-            id: instCourse.id + 1000,
-            title: instCourse.name,
-            description: instCourse.description,
-            instructor: 'Instrutor Institucional',
-            thumbnail: instCourse.image || '../../../assets/images/course-placeholder.jpg',
-            workload: 0,
-            category: 'Institucional',
-            level: 'beginner',
-            price: 0,
-            isEnrolled: false,
-            enrollmentDate: instCourse.createdAt,
-            modules: [],
-            progress: {
-              completed: 0,
-              total: 0,
-              percentageCompleted: 0,
-              lastAccessDate: new Date(),
-              status: 'not_started'
-            },
-            score: {
-              current: 0,
-              total: 0,
-              achievements: []
-            },
-            createdAt: instCourse.createdAt,
-            updatedAt: instCourse.updatedAt,
-            tags: [],
-            prerequisites: []
-          };
-        })
+  getInstitutionCourses(): Observable<InstitutionCourse[]> {
+    return this.http
+      .get<ApiResponse<InstitutionCourse[]>>(`${this.institutionApiUrl}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
       );
+  }
+
+  getCourseById(id: number): Observable<Course> {
+    // Se o ID é maior que 1000, é um curso institucional convertido
+    if (id > 1000) {
+      return this.http
+        .get<ApiResponse<InstitutionCourse>>(
+          `${this.institutionApiUrl}/${id - 1000}`
+        )
+        .pipe(
+          map((response) => {
+            if (!response.data) throw new Error('Course not found');
+            return this.convertInstitutionToStudentCourse(response.data, id);
+          }),
+          catchError(this.errorHandler.handleError)
+        );
     }
 
-    const course = this.courses.find(course => course.id === id);
-    return of(course);
+    return this.http.get<ApiResponse<Course>>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => response.data!),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
-  addCourse(course: Course): Observable<Course> {
-    course.id = this.generateId();
-    course.createdAt = new Date();
-    course.updatedAt = new Date();
-    course.progress = {
-      completed: 0,
-      total: this.calculateTotalItems(course),
-      percentageCompleted: 0,
-      status: 'not_started'
-    };
-    this.courses.push(course);
-    return of(course);
+  getCoursesByCategory(category: string): Observable<Course[]> {
+    return this.http
+      .get<ApiResponse<Course[]>>(
+        `${this.apiUrl}/category/${encodeURIComponent(category)}`
+      )
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  updateCourse(updatedCourse: Course): Observable<Course | undefined> {
-    const index = this.courses.findIndex(course => course.id === updatedCourse.id);
-    if (index !== -1) {
-      updatedCourse.updatedAt = new Date();
-      this.courses[index] = updatedCourse;
-      return of(updatedCourse);
+  getCoursesByLevel(level: string): Observable<Course[]> {
+    return this.http
+      .get<ApiResponse<Course[]>>(`${this.apiUrl}/level/${level}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  getCoursesByTag(tag: string): Observable<Course[]> {
+    return this.http
+      .get<ApiResponse<Course[]>>(
+        `${this.apiUrl}/tag/${encodeURIComponent(tag)}`
+      )
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  searchCourses(query: string): Observable<Course[]> {
+    const params = new HttpParams().set('query', query);
+    return this.http
+      .get<ApiResponse<Course[]>>(`${this.apiUrl}/search`, { params })
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  enrollInCourse(courseId: number, userId: number): Observable<boolean> {
+    return this.http
+      .post<ApiResponse<boolean>>(
+        `${this.apiUrl}/${courseId}/enroll/${userId}`,
+        {}
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  // Métodos para atualizar progresso
+  updateVideoProgress(
+    courseId: number,
+    videoId: number,
+    userId: number,
+    moduleId?: number
+  ): Observable<Course> {
+    const params = moduleId
+      ? new HttpParams().set('moduleId', moduleId.toString())
+      : new HttpParams();
+    return this.http
+      .put<ApiResponse<Course>>(
+        `${this.apiUrl}/${courseId}/progress/video/${videoId}/user/${userId}`,
+        {},
+        { params }
+      )
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  updateMaterialProgress(
+    courseId: number,
+    materialId: number,
+    userId: number,
+    moduleId?: number
+  ): Observable<Course> {
+    const params = moduleId
+      ? new HttpParams().set('moduleId', moduleId.toString())
+      : new HttpParams();
+    return this.http
+      .put<ApiResponse<Course>>(
+        `${this.apiUrl}/${courseId}/progress/material/${materialId}/user/${userId}`,
+        {},
+        { params }
+      )
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  updateQuizProgress(
+    courseId: number,
+    quizId: number,
+    userId: number,
+    score: number,
+    moduleId?: number
+  ): Observable<Course> {
+    const params = moduleId
+      ? new HttpParams()
+          .set('moduleId', moduleId.toString())
+          .set('score', score.toString())
+      : new HttpParams().set('score', score.toString());
+
+    return this.http
+      .put<ApiResponse<Course>>(
+        `${this.apiUrl}/${courseId}/progress/quiz/${quizId}/user/${userId}`,
+        {},
+        { params }
+      )
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  // Métodos de conveniência (mantidos para compatibilidade)
+  updateCourseProgress(
+    courseId: number,
+    moduleId: number,
+    contentType: 'video' | 'text' | 'quiz',
+    contentId: number
+  ): Observable<Course> {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      return throwError(() => new Error('User not authenticated'));
     }
-    return of(undefined);
-  }
-
-  deleteCourse(id: number): Observable<boolean> {
-    const initialLength = this.courses.length;
-    this.courses = this.courses.filter(course => course.id !== id);
-    return of(this.courses.length < initialLength);
-  }
-
-  updateCourseProgress(courseId: number, moduleId: number, contentType: 'video' | 'text' | 'quiz', contentId: number): Observable<Course | undefined> {
-    const course = this.courses.find(c => c.id === courseId);
-    if (!course) return of(undefined);
-
-    const module = course.modules.find(m => m.id === moduleId);
-    if (!module) return of(undefined);
 
     switch (contentType) {
       case 'video':
-        const video = module.content.videos.find(v => v.id === contentId);
-        if (video) video.isWatched = true;
-        break;
+        return this.updateVideoProgress(courseId, contentId, userId, moduleId);
       case 'text':
-        const text = module.content.textMaterials.find(t => t.id === contentId);
-        if (text) text.isRead = true;
-        break;
+        return this.updateMaterialProgress(
+          courseId,
+          contentId,
+          userId,
+          moduleId
+        );
       case 'quiz':
-        const quiz = module.content.quizzes.find(q => q.id === contentId);
-        if (quiz) quiz.isCompleted = true;
-        break;
+        return this.updateQuizProgress(
+          courseId,
+          contentId,
+          userId,
+          100,
+          moduleId
+        ); // Score padrão
+      default:
+        return throwError(() => new Error('Invalid content type'));
     }
-
-    this.recalculateProgress(course);
-    return this.updateCourse(course);
   }
 
-  private recalculateProgress(course: Course): void {
-    const totalItems = this.calculateTotalItems(course);
-    const completedItems = this.calculateCompletedItems(course);
-    
-    course.progress = {
-      completed: completedItems,
-      total: totalItems,
-      percentageCompleted: Math.round((completedItems / totalItems) * 100),
-      lastAccessDate: new Date(),
-      status: completedItems === totalItems ? 'completed' : 'in_progress'
+  // Método de conveniência para matrícula sem precisar passar userId
+  enrollInCourseCurrentUser(courseId: number): Observable<boolean> {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+    return this.enrollInCourse(courseId, userId);
+  }
+
+  addAchievement(
+    courseId: number,
+    achievement: Achievement
+  ): Observable<Course> {
+    // Este método seria implementado quando o backend suportar achievements
+    return throwError(() => new Error('Method not implemented in backend yet'));
+  }
+
+  submitQuizAttempt(
+    courseId: number,
+    moduleId: number,
+    quizId: number,
+    attempt: QuizAttempt
+  ): Observable<Course> {
+    // Este método seria implementado quando o backend suportar quiz attempts
+    return throwError(() => new Error('Method not implemented in backend yet'));
+  }
+
+  // Método auxiliar para converter InstitutionCourse para Course
+  private convertInstitutionToStudentCourse(
+    instCourse: InstitutionCourse,
+    overrideId?: number
+  ): Course {
+    return {
+      id: overrideId || instCourse.id + 1000, // Evitar conflito de IDs
+      title: instCourse.name,
+      description: instCourse.description,
+      instructor: 'Instrutor Institucional',
+      thumbnail:
+        instCourse.image || '../../../assets/images/course-placeholder.jpg',
+      workload: 0,
+      category: 'Institucional',
+      level: 'beginner' as const,
+      price: 0,
+      isEnrolled: false,
+      enrollmentDate: instCourse.createdAt,
+      modules: [], // Seria convertido se o backend fornecesse módulos estruturados
+      progress: {
+        completed: 0,
+        total: 0,
+        percentageCompleted: 0,
+        lastAccessDate: new Date(),
+        status: 'not_started' as const,
+      },
+      score: {
+        current: 0,
+        total: 0,
+        achievements: [],
+      },
+      createdAt: instCourse.createdAt,
+      updatedAt: instCourse.updatedAt,
+      tags: [],
+      prerequisites: [],
     };
-  }
-
-  private calculateTotalItems(course: Course): number {
-    return course.modules.reduce((total, module) => {
-      return total + 
-        module.content.videos.length +
-        module.content.textMaterials.length +
-        module.content.quizzes.length;
-    }, 0);
-  }
-
-  private calculateCompletedItems(course: Course): number {
-    return course.modules.reduce((total, module) => {
-      return total +
-        module.content.videos.filter(v => v.isWatched).length +
-        module.content.textMaterials.filter(t => t.isRead).length +
-        module.content.quizzes.filter(q => q.isCompleted).length;
-    }, 0);
-  }
-
-  private generateId(): number {
-    if (this.courses.length === 0) {
-      return 1;
-    }
-    return Math.max(...this.courses.map(course => course.id)) + 1;
-  }
-
-  addAchievement(courseId: number, achievement: Achievement): Observable<Course | undefined> {
-    const course = this.courses.find(c => c.id === courseId);
-    if (!course) return of(undefined);
-
-    course.score.achievements.push(achievement);
-    course.score.current += achievement.points;
-    return this.updateCourse(course);
-  }
-
-  submitQuizAttempt(courseId: number, moduleId: number, quizId: number, attempt: QuizAttempt): Observable<Course | undefined> {
-    const course = this.courses.find(c => c.id === courseId);
-    if (!course) return of(undefined);
-
-    const module = course.modules.find(m => m.id === moduleId);
-    if (!module) return of(undefined);
-
-    const quiz = module.content.quizzes.find(q => q.id === quizId);
-    if (!quiz) return of(undefined);
-
-    quiz.attempts.push(attempt);
-    quiz.bestScore = Math.max(...quiz.attempts.map(a => a.score));
-    quiz.isCompleted = quiz.bestScore >= quiz.minimumScore;
-
-    return this.updateCourse(course);
   }
 }

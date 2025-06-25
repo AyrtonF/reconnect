@@ -11,7 +11,7 @@ import { NavController } from '@ionic/angular';
   selector: 'app-challenge-details',
   templateUrl: './challenge-details.page.html',
   styleUrls: ['./challenge-details.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class ChallengeDetailsPage implements OnInit {
   challenge: Challenge | undefined;
@@ -29,21 +29,23 @@ export class ChallengeDetailsPage implements OnInit {
   }
 
   loadChallengeDetails() {
-    this.route.paramMap.pipe(
-      switchMap(params => {
-        const challengeId = Number(params.get('id'));
-        return this.challengeService.getChallengeById(challengeId);
-      })
-    ).subscribe(challenge => {
-      this.challenge = challenge;
-      this.loadParticipants();
-    });
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const challengeId = Number(params.get('id'));
+          return this.challengeService.getChallengeById(challengeId);
+        })
+      )
+      .subscribe((challenge) => {
+        this.challenge = challenge;
+        this.loadParticipants();
+      });
   }
 
   loadParticipants() {
     if (this.challenge?.participantsIds) {
-      this.challenge.participantsIds.forEach(userId => {
-        this.userService.getUserById(userId).subscribe(user => {
+      this.challenge.participantsIds.forEach((userId) => {
+        this.userService.getUserById(userId).subscribe((user) => {
           if (user) {
             this.participants.push(user);
           }
@@ -56,21 +58,24 @@ export class ChallengeDetailsPage implements OnInit {
     this.navCtrl.navigateRoot('/challenge');
   }
 
-  // Método para participar do desafio (mockado)
+  // Método para participar do desafio
   participateChallenge() {
     if (this.challenge) {
       const loggedInUserId = 1; // Mock do usuário logado
-      if (!this.challenge.participantsIds?.includes(loggedInUserId)) {
-        const updatedChallenge: Challenge = {
-          ...this.challenge,
-          participantsIds: [...(this.challenge.participantsIds || []), loggedInUserId]
-        };
-        this.challengeService.updateChallenge(updatedChallenge).subscribe(() => {
-          this.loadChallengeDetails(); // Recarrega os detalhes após participar
-        });
-      } else {
-        console.log('Você já participa deste desafio.');
-      }
+      this.challengeService
+        .participateInChallenge(this.challenge.id, loggedInUserId)
+        .subscribe(
+          (success) => {
+            if (success) {
+              this.loadChallengeDetails(); // Recarrega os detalhes após participar
+            } else {
+              console.log('Não foi possível participar do desafio.');
+            }
+          },
+          (error) => {
+            console.error('Erro ao participar do desafio:', error);
+          }
+        );
     }
   }
 }

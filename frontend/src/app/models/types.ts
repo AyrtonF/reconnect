@@ -146,6 +146,7 @@ export type Coupon = {
   description?: string;
   scoreRequired?: number;
   validUntil?: string;
+  redeemedByIds?: number[];
 };
 // Student course types (for consuming courses)
 export type StudentCourse = {
@@ -157,13 +158,13 @@ export type StudentCourse = {
   workload: number;
   category: string;
   level: 'beginner' | 'intermediate' | 'advanced';
-  
+
   price: number;
   isEnrolled?: boolean;
   enrollmentDate?: Date;
-  
+
   modules: CourseModule[];
-  
+
   progress: {
     completed: number;
     total: number;
@@ -171,13 +172,13 @@ export type StudentCourse = {
     lastAccessDate?: Date;
     status: 'not_started' | 'in_progress' | 'completed';
   };
-  
+
   score: {
     current: number;
     total: number;
     achievements: Achievement[];
   };
-  
+
   createdAt: Date;
   updatedAt: Date;
   tags: string[];
@@ -192,13 +193,13 @@ export type CourseModule = {
   title: string;
   description: string;
   order: number;
-  
+
   content: {
     videos: StudentVideo[];
     textMaterials: TextMaterial[];
     quizzes: Quiz[];
   };
-  
+
   isLocked: boolean;
   progress: number;
 };

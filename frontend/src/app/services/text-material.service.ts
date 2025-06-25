@@ -1,57 +1,86 @@
 import { Injectable } from '@angular/core';
-import { TextMaterial } from '../models/types';
-
-import { Observable, of } from 'rxjs';
-
-
-
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { TextMaterial, ApiResponse } from '../models/types';
+import { environment } from '../../environments/environment';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TextMaterialService {
-  private textMaterials: TextMaterial[] = [
-    { id: 1, title: 'Atenção aos riscos digitais', text: 'Entenda os principais riscos...' },
-    { id: 2, title: 'Guia de Segurança Online para Adolescentes' },
-    // Adicione mais materiais de texto conforme necessário
-  ];
+  private apiUrl = `${environment.apiUrl}/text-materials`;
 
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   getAllTextMaterials(): Observable<TextMaterial[]> {
-    return of(this.textMaterials);
+    return this.http.get<ApiResponse<TextMaterial[]>>(`${this.apiUrl}`).pipe(
+      map((response) => response.data || []),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
   getTextMaterialById(id: number): Observable<TextMaterial | undefined> {
-    const textMaterial = this.textMaterials.find(tm => tm.id === id);
-    return of(textMaterial);
+    return this.http
+      .get<ApiResponse<TextMaterial>>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map((response) => response.data),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  addTextMaterial(textMaterial: TextMaterial): Observable<TextMaterial> {
-    textMaterial.id = this.generateId();
-    this.textMaterials.push(textMaterial);
-    return of(textMaterial);
+  getTextMaterialsByCourse(courseId: number): Observable<TextMaterial[]> {
+    return this.http
+      .get<ApiResponse<TextMaterial[]>>(`${this.apiUrl}/course/${courseId}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  updateTextMaterial(updatedTextMaterial: TextMaterial): Observable<TextMaterial | undefined> {
-    const index = this.textMaterials.findIndex(tm => tm.id === updatedTextMaterial.id);
-    if (index !== -1) {
-      this.textMaterials[index] = updatedTextMaterial;
-      return of(updatedTextMaterial);
-    }
-    return of(undefined);
+  getTextMaterialsByModule(moduleId: number): Observable<TextMaterial[]> {
+    return this.http
+      .get<ApiResponse<TextMaterial[]>>(`${this.apiUrl}/module/${moduleId}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  addTextMaterial(
+    textMaterial: Partial<TextMaterial>
+  ): Observable<TextMaterial> {
+    return this.http
+      .post<ApiResponse<TextMaterial>>(`${this.apiUrl}`, textMaterial)
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  updateTextMaterial(
+    id: number,
+    updatedTextMaterial: Partial<TextMaterial>
+  ): Observable<TextMaterial> {
+    return this.http
+      .put<ApiResponse<TextMaterial>>(
+        `${this.apiUrl}/${id}`,
+        updatedTextMaterial
+      )
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
   deleteTextMaterial(id: number): Observable<boolean> {
-    const initialLength = this.textMaterials.length;
-    this.textMaterials = this.textMaterials.filter(tm => tm.id !== id);
-    return of(this.textMaterials.length < initialLength);
-  }
-
-  private generateId(): number {
-    if (this.textMaterials.length === 0) {
-      return 1;
-    }
-    return Math.max(...this.textMaterials.map(tm => tm.id)) + 1;
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => response.success),
+      catchError(this.errorHandler.handleError)
+    );
   }
 }

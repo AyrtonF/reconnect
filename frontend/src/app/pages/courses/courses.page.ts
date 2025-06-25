@@ -36,13 +36,20 @@ export class CoursesPage implements OnInit {
   }
   startCourse(course: Course) {
     if (!course.isEnrolled) {
-      this.courseService.enrollInCourse(course.id).subscribe(() => {
-        const type = course.id > 1000 ? 'institutional' : 'regular';
-        const actualId = course.id > 1000 ? course.id - 1000 : course.id;
-        this.navCtrl.navigateForward(`/course-details/${actualId}`, {
-          queryParams: { type },
-        });
-      });
+      this.courseService.enrollInCourseCurrentUser(course.id).subscribe(
+        (enrolled) => {
+          if (enrolled) {
+            const type = course.id > 1000 ? 'institutional' : 'regular';
+            const actualId = course.id > 1000 ? course.id - 1000 : course.id;
+            this.navCtrl.navigateForward(`/course-details/${actualId}`, {
+              queryParams: { type },
+            });
+          }
+        },
+        (error) => {
+          console.error('Erro ao matricular no curso:', error);
+        }
+      );
     } else {
       const type = course.id > 1000 ? 'institutional' : 'regular';
       const actualId = course.id > 1000 ? course.id - 1000 : course.id;

@@ -1,88 +1,111 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Challenge } from '../models/types'; 
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map, catchError } from 'rxjs/operators';
+import { Challenge, ApiResponse } from '../models/types';
+import { environment } from '../../environments/environment';
+import { ErrorHandlerService } from './error-handler.service';
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ChallengeService {
-  private mockChallenges: Challenge[] = [
-    {
-      id: 1,
-      title: 'Fazer uma Caminhada',
-      description: 'Caminhada de 5km com familiares e amigos.',
-      status: 'completed',
-      participantsIds: [1, 2, 3, 4],
-      image: '../../../assets/images/pedalada.png',
-      imageBanner:'../../../assets/images/pedalada-banner.png',
-      checks: 4,
-      score: 100,
-      type: 'physical',
-      familyId: 1
-    },
-    {
-      id: 2,
-      title: 'Ler um Livro',
-      description: 'Ler um livro de pelo menos 100 páginas.',
-      status: 'pending',
-      participantsIds: [1, 2],
-      image: '../../../assets/images/cinema.png',
-      imageBanner:'../../../assets/images/cinemark-banner.png',
-      checks: 0,
-      score: 50,
-      type: 'intellectual',
-      familyId: 1
-    },
-    {
-      id: 3,
-      title: 'Plantar uma Árvore',
-      description: 'Plantar uma árvore em um local apropriado.',
-      status: 'notStarted',
-      participantsIds: [3, 4],
-      image: '../../../assets/images/cinema.png',
-      checks: 1,
-      score: 150,
-      type: 'environmental',
-      familyId: 2
-    },
-    // Adicione mais desafios mockados conforme necessário
-  ];
+  private apiUrl = `${environment.apiUrl}/challenges`;
 
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   getAllChallenges(): Observable<Challenge[]> {
-    return of(this.mockChallenges);
+    return this.http.get<ApiResponse<Challenge[]>>(`${this.apiUrl}`).pipe(
+      map((response) => response.data || []),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
-  getChallengeById(id: number): Observable<Challenge | undefined> {
-    const challenge = this.mockChallenges.find(challenge => challenge.id === id);
-    return of(challenge);
+  getChallengeById(id: number): Observable<Challenge> {
+    return this.http.get<ApiResponse<Challenge>>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => response.data!),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
   addChallenge(challenge: Challenge): Observable<Challenge> {
-    challenge.id = this.generateId();
-    this.mockChallenges.push(challenge);
-    return of(challenge);
+    return this.http
+      .post<ApiResponse<Challenge>>(`${this.apiUrl}`, challenge)
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  updateChallenge(updatedChallenge: Challenge): Observable<Challenge | undefined> {
-    const index = this.mockChallenges.findIndex(challenge => challenge.id === updatedChallenge.id);
-    if (index !== -1) {
-      this.mockChallenges[index] = updatedChallenge;
-      return of(updatedChallenge);
-    }
-    return of(undefined);
+  updateChallenge(id: number, challenge: Challenge): Observable<Challenge> {
+    return this.http
+      .put<ApiResponse<Challenge>>(`${this.apiUrl}/${id}`, challenge)
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
-  deleteChallenge(id: number): Observable<boolean> {
-    const initialLength = this.mockChallenges.length;
-    this.mockChallenges = this.mockChallenges.filter(challenge => challenge.id !== id);
-    return of(this.mockChallenges.length < initialLength);
+  deleteChallenge(id: number): Observable<void> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`).pipe(
+      map(() => void 0),
+      catchError(this.errorHandler.handleError)
+    );
   }
 
-  private generateId(): number {
-    if (this.mockChallenges.length === 0) {
-      return 1;
-    }
-    return Math.max(...this.mockChallenges.map(challenge => challenge.id)) + 1;
+  getChallengesByFamily(familyId: number): Observable<Challenge[]> {
+    return this.http
+      .get<ApiResponse<Challenge[]>>(`${this.apiUrl}/family/${familyId}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  getChallengesByStatus(status: string): Observable<Challenge[]> {
+    return this.http
+      .get<ApiResponse<Challenge[]>>(`${this.apiUrl}/status/${status}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  getChallengesByType(type: string): Observable<Challenge[]> {
+    return this.http
+      .get<ApiResponse<Challenge[]>>(`${this.apiUrl}/type/${type}`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  participateInChallenge(
+    challengeId: number,
+    userId: number
+  ): Observable<boolean> {
+    return this.http
+      .post<ApiResponse<boolean>>(
+        `${this.apiUrl}/${challengeId}/participate/${userId}`,
+        {}
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  completeChallenge(challengeId: number, userId: number): Observable<boolean> {
+    return this.http
+      .post<ApiResponse<boolean>>(
+        `${this.apiUrl}/${challengeId}/complete/${userId}`,
+        {}
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
   }
 }
