@@ -1,67 +1,248 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { User } from '../models/types';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiResponse } from '../models/types';
 
 interface AuthResponse {
   token: string;
   role: string;
 }
 
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN';
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // Mock de usuários em memória
-  private mockUsers: User[] = [
-    { id: 1, name: 'André', email: 'andre@gmail.com', password: '123456', role: 'user' },
-    { id: 2, name: 'Maria', email: 'maria@gmail.com', password: 'senha123', role: 'admin' },
-    { id: 3, name: 'João', email: 'joao@gmail.com', password: 'abc123', role: 'user' },
-    { id: 4, name: 'Joao Silva', email: 'joao.silva@mentestudy.com', password: '123456', role: 'institution_admin' },
-  ];
+  private readonly apiUrl = 'http://localhost:8080/api/auth';
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   login(email: string, password: string): Observable<AuthResponse> {
-    const user = this.mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-
-    if (user) {
-      // Simulação de geração de um token (apenas uma string aleatória)
-      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      return of({ token: `Bearer ${token}`, role: user.role });
-    } else {
-      return throwError(() => new Error('Credenciais inválidas'));
-    }
-  }
-
-  register(name: string, email: string, password: string): Observable<AuthResponse> {
-    // Verifica se o email já existe
-    const existingUser = this.mockUsers.find(u => u.email === email);
-    if (existingUser) {
-      return throwError(() => new Error('Este email já está cadastrado.'));
+    // Validação básica no frontend
+    if (!email || !password) {
+      return throwError(() => new Error('Email e senha são obrigatórios'));
     }
 
-    // Simula a criação de um novo usuário
-    const newUser: User = {
-      id: this.generateId(), // Simula a geração de um ID
-      name: name,
-      email: email,
-      password: password,
-      role: 'user', 
+    if (!this.isValidEmail(email)) {
+      return throwError(() => new Error('Email inválido'));
+    }
+
+    const loginRequest: LoginRequest = {
+      email: email.trim(),
+      password: password
     };
 
-    this.mockUsers.push(newUser);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
 
-    // Simula a geração de um token para o novo usuário
-    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    return of({ token: `Bearer ${token}`, role: newUser.role });
+    console.log('Enviando dados de login:', { email: loginRequest.email, password: '***' });
+
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, loginRequest, { headers })
+      .pipe(
+        map(response => {
+          console.log('Resposta da API:', response);
+          
+          if (response.success && response.data) {
+            // Adiciona "Bearer " se não estiver presente no token
+            const token = response.data.token.startsWith('Bearer ') 
+              ? response.data.token 
+              : `Bearer ${response.data.token}`;
+            
+            return {
+              token: token,
+              role: response.data.role
+            };
+          } else {
+            throw new Error(response.error || response.message || 'Login failed');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro completo da API:', error);
+          
+          let errorMessage = 'Erro ao fazer login';
+          
+          // Tratamento específico para erro 400
+          if (error.status === 400) {
+            if (error.error?.error) {
+              errorMessage = error.error.error;
+            } else if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.error) {
+              // Se o error for uma string
+              errorMessage = typeof error.error === 'string' ? error.error : 'Dados inválidos';
+            } else {
+              errorMessage = 'Dados de login inválidos';
+            }
+          } else if (error.status === 401) {
+            errorMessage = 'Credenciais inválidas';
+          } else if (error.status === 0) {
+            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+          } else {
+            errorMessage = error.message || 'Erro desconhecido';
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
-  private generateId(): number {
-    if (this.mockUsers.length === 0) {
-      return 1;
+  register(name: string, email: string, password: string, role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' = 'USER'): Observable<AuthResponse> {
+    // Validação básica no frontend
+    if (!name || !email || !password) {
+      return throwError(() => new Error('Todos os campos são obrigatórios'));
     }
-    return Math.max(...this.mockUsers.map(user => user.id)) + 1;
+
+    if (!this.isValidEmail(email)) {
+      return throwError(() => new Error('Email inválido'));
+    }
+
+    if (password.length < 6) {
+      return throwError(() => new Error('A senha deve ter no mínimo 6 caracteres'));
+    }
+
+    const registerRequest: RegisterRequest = {
+      name: name.trim(),
+      email: email.trim(),
+      password: password,
+      role: role
+    };
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+
+    console.log('Enviando dados de registro:', { 
+      name: registerRequest.name, 
+      email: registerRequest.email, 
+      password: '***',
+      role: registerRequest.role 
+    });
+
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/register`, registerRequest, { headers })
+      .pipe(
+        map(response => {
+          console.log('Resposta da API (registro):', response);
+          
+          if (response.success && response.data) {
+            // Adiciona "Bearer " se não estiver presente no token
+            const token = response.data.token.startsWith('Bearer ') 
+              ? response.data.token 
+              : `Bearer ${response.data.token}`;
+            
+            return {
+              token: token,
+              role: response.data.role
+            };
+          } else {
+            throw new Error(response.error || response.message || 'Registration failed');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro completo da API (registro):', error);
+          
+          let errorMessage = 'Erro ao registrar usuário';
+          
+          if (error.status === 400) {
+            if (error.error?.error) {
+              errorMessage = error.error.error;
+            } else if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else {
+              errorMessage = 'Dados de registro inválidos';
+            }
+          } else if (error.status === 0) {
+            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+          } else {
+            errorMessage = error.message || 'Erro desconhecido';
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  // Método para obter a rota de redirecionamento baseada no role
+  getRedirectRoute(role: string): string {
+    switch (role.toUpperCase()) {
+      case 'ADMIN':
+        return '/home'; // Redireciona para home até criar página específica de admin
+      case 'INSTITUTION_ADMIN':
+        return '/home-company'; // Página já existe para instituições
+      case 'USER':
+      default:
+        return '/home'; // Página padrão para usuários
+    }
+  }
+
+  // Método auxiliar para validar email
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // Método para salvar o token no localStorage
+  saveToken(token: string): void {
+    localStorage.setItem('authToken', token);
+  }
+
+  // Método para obter o token do localStorage
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
+
+  // Método para salvar o role do usuário
+  saveUserRole(role: string): void {
+    localStorage.setItem('userRole', role);
+  }
+
+  // Método para obter o role do usuário
+  getUserRole(): string | null {
+    return localStorage.getItem('userRole');
+  }
+
+  // Método para remover dados de autenticação
+  logout(): void {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+  }
+
+  // Método para verificar se o usuário está logado
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    return token !== null && token.length > 0;
+  }
+
+  // Método para verificar se o usuário tem uma role específica
+  hasRole(role: string): boolean {
+    const userRole = this.getUserRole();
+    return userRole === role;
+  }
+
+  // Métodos de conveniência para verificar roles específicas
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
+  }
+
+  isInstitutionAdmin(): boolean {
+    return this.hasRole('INSTITUTION_ADMIN');
+  }
+
+  isUser(): boolean {
+    return this.hasRole('USER');
   }
 }

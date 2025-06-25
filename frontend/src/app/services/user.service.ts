@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models/types';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { User, ApiResponse } from '../models/types';
+import { AuthService } from './auth.service';
 
 export type UserType = 'standard' | 'institutional';
 
@@ -16,118 +19,342 @@ export interface InstitutionalUser extends User {
   };
 }
 
+interface UserCreateRequest {
+  name: string;
+  email: string;
+  password: string;
+  role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN';
+  institutionId?: number;
+  phone?: string;
+  avatar?: string;
+}
+
+interface UserUpdateRequest {
+  name?: string;
+  phone?: string;
+  avatar?: string;
+  password?: string;
+}
+
+interface UserDto {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  institutionId?: number;
+  phone?: string;
+  score?: number;
+  avatar?: string;
+  coursesIds?: number[];
+  familyIds?: number[];
+  challengesCompletedIds?: number[];
+  pendingChallengesIds?: number[];
+  imagesOfChallenge?: string[];
+  couponsIds?: number[];
+  posts?: number[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private users: (User | InstitutionalUser)[] = [
-    {
-      id: 1,
-      name: 'André',
-      email: 'andre@gmail.com',
-      password: '12345',
-      role: 'user',
-      phone: '+55 (81)99999-9999',
-      score: 800,
-      avatar: '../../../assets/images/marcos.png',
-      coursesIds: [1, 2, 3],
-      familyIds: [1],
-      challengesCompletedIds: [1, 3],
-      pendingChallengesIds: [2, 4, 5],
-      imagesOfChallenge: ['assets/uploads/desafio1.jpg', 'assets/uploads/desafio2.jpg'],
-      couponsIds: [1, 2, 3],
-      posts: [1, 2]
-    },
-    {
-      id: 2,
-      name: 'Maria',
-      email: 'maria@gmail.com',
-      role: 'admin',
-      score: 950,
-      coursesIds: [2],
-      familyIds: [1],
-      challengesCompletedIds: [2],
-      pendingChallengesIds: [1],
-      couponsIds: [2]
-    },
-    // Usuários institucionais
-    {
-      id: 3,
-      name: 'João Silva',
-      email: 'joao.silva@mentestudy.com',
-      password: '123456',
-      role: 'institution_admin',
-      userType: 'institutional',
-      institutionId: 1,
-      avatar: 'assets/images/avatars/joao.jpg',
-      phone: '(81) 99999-1234',
-      permissions: {
-        canCreateCourses: true,
-        canEditCourses: true,
-        canDeleteCourses: true,
-        canManageUsers: true,
-        canViewReports: true
-      }
-    },
-    {
-      id: 4,
-      name: 'Maria Santos',
-      email: 'maria.santos@mentestudy.com',
-      password: '123456',
-      role: 'institution_teacher',
-      userType: 'institutional',
-      institutionId: 1,
-      avatar: 'assets/images/avatars/maria.jpg',
-      phone: '(81) 99999-5678',
-      permissions: {
-        canCreateCourses: true,
-        canEditCourses: true,
-        canDeleteCourses: false,
-        canManageUsers: false,
-        canViewReports: true
-      }
-    }
-  ];
+  private readonly apiUrl = 'http://localhost:8080/api/users';
 
-  constructor() { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
-  getAllUsers(): Observable<(User | InstitutionalUser)[]> {
-    return of(this.users);
+  // Método para obter headers com autorização
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': token || ''
+    });
   }
 
-  getUserById(id: number): Observable<User | InstitutionalUser | undefined> {
-    const user = this.users.find(user => user.id === id);
-    return of(user);
+  // Converter UserDto para User
+  private mapDtoToUser(dto: UserDto): User {
+    return {
+      id: dto.id,
+      name: dto.name,
+      email: dto.email,
+      role: dto.role,
+      institutionId: dto.institutionId,
+      phone: dto.phone,
+      score: dto.score,
+      avatar: dto.avatar,
+      coursesIds: dto.coursesIds,
+      familyIds: dto.familyIds,
+      challengesCompletedIds: dto.challengesCompletedIds,
+      pendingChallengesIds: dto.pendingChallengesIds,
+      imagesOfChallenge: dto.imagesOfChallenge,
+      couponsIds: dto.couponsIds,
+      posts: dto.posts
+    };
   }
 
-  getInstitutionalUsers(): Observable<InstitutionalUser[]> {
-    return of(this.users.filter(user => 
-      'userType' in user && user.userType === 'institutional'
-    ) as InstitutionalUser[]);
+  // Obter todos os usuários (apenas para admin/institution_admin)
+  getAllUsers(): Observable<User[]> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<ApiResponse<UserDto[]>>(`${this.apiUrl}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return response.data.map(dto => this.mapDtoToUser(dto));
+          } else {
+            throw new Error(response.error || 'Failed to fetch users');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao buscar usuários:', error);
+          let errorMessage = 'Erro ao buscar usuários';
+          
+          if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
-  addUser(user: User | InstitutionalUser): Observable<User | InstitutionalUser> {
-    user.id = this.generateId();
-    this.users.push(user);
-    return of(user);
+  // Obter usuário por ID
+  getUserById(id: number): Observable<User | undefined> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<ApiResponse<UserDto>>(`${this.apiUrl}/${id}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return this.mapDtoToUser(response.data);
+          } else {
+            throw new Error(response.error || 'User not found');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao buscar usuário:', error);
+          let errorMessage = 'Erro ao buscar usuário';
+          
+          if (error.status === 404) {
+            errorMessage = 'Usuário não encontrado';
+          } else if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
-  updateUser(updatedUser: User | InstitutionalUser): Observable<User | InstitutionalUser | undefined> {
-    const index = this.users.findIndex(user => user.id === updatedUser.id);
-    if (index !== -1) {
-      this.users[index] = updatedUser;
-      return of(updatedUser);
-    }
-    return of(undefined);
+  // Obter usuário atual (logado)
+  getCurrentUser(): Observable<User> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<ApiResponse<UserDto>>(`${this.apiUrl}/me`, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return this.mapDtoToUser(response.data);
+          } else {
+            throw new Error(response.error || 'Failed to fetch current user');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao buscar usuário atual:', error);
+          let errorMessage = 'Erro ao buscar dados do usuário';
+          
+          if (error.status === 401) {
+            errorMessage = 'Token inválido ou expirado';
+            // Logout automático se token inválido
+            this.authService.logout();
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
+  // Obter usuários por instituição
+  getUsersByInstitution(institutionId: number): Observable<User[]> {
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<ApiResponse<UserDto[]>>(`${this.apiUrl}/institution/${institutionId}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return response.data.map(dto => this.mapDtoToUser(dto));
+          } else {
+            throw new Error(response.error || 'Failed to fetch institution users');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao buscar usuários da instituição:', error);
+          let errorMessage = 'Erro ao buscar usuários da instituição';
+          
+          if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  // Criar novo usuário
+  addUser(user: User | InstitutionalUser): Observable<User> {
+    const headers = this.getAuthHeaders();
+    
+    const createRequest: UserCreateRequest = {
+      name: user.name,
+      email: user.email,
+      password: user.password || '123456', // Senha padrão se não fornecida
+      role: user.role.toUpperCase() as 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN',
+      institutionId: user.institutionId,
+      phone: user.phone,
+      avatar: user.avatar
+    };
+
+    return this.http.post<ApiResponse<UserDto>>(`${this.apiUrl}`, createRequest, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return this.mapDtoToUser(response.data);
+          } else {
+            throw new Error(response.error || 'Failed to create user');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao criar usuário:', error);
+          let errorMessage = 'Erro ao criar usuário';
+          
+          if (error.status === 400) {
+            errorMessage = 'Dados inválidos para criação do usuário';
+          } else if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  // Atualizar usuário
+  updateUser(updatedUser: User | InstitutionalUser): Observable<User | undefined> {
+    const headers = this.getAuthHeaders();
+    
+    const updateRequest: UserUpdateRequest = {
+      name: updatedUser.name,
+      phone: updatedUser.phone,
+      avatar: updatedUser.avatar,
+      // Só inclui password se foi fornecida
+      ...(updatedUser.password && { password: updatedUser.password })
+    };
+
+    return this.http.put<ApiResponse<UserDto>>(`${this.apiUrl}/${updatedUser.id}`, updateRequest, { headers })
+      .pipe(
+        map(response => {
+          if (response.success && response.data) {
+            return this.mapDtoToUser(response.data);
+          } else {
+            throw new Error(response.error || 'Failed to update user');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao atualizar usuário:', error);
+          let errorMessage = 'Erro ao atualizar usuário';
+          
+          if (error.status === 400) {
+            errorMessage = 'Dados inválidos para atualização';
+          } else if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.status === 404) {
+            errorMessage = 'Usuário não encontrado';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  // Deletar usuário
   deleteUser(id: number): Observable<boolean> {
-    const initialLength = this.users.length;
-    this.users = this.users.filter(user => user.id !== id);
-    return of(this.users.length < initialLength);
+    const headers = this.getAuthHeaders();
+    
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.success) {
+            return true;
+          } else {
+            throw new Error(response.error || 'Failed to delete user');
+          }
+        }),
+        catchError(error => {
+          console.error('Erro ao deletar usuário:', error);
+          let errorMessage = 'Erro ao deletar usuário';
+          
+          if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 403) {
+            errorMessage = 'Permissão negada';
+          } else if (error.status === 404) {
+            errorMessage = 'Usuário não encontrado';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
-  private generateId(): number {
-    return Math.max(...this.users.map(user => user.id)) + 1;
+  // Métodos para compatibilidade com código existente
+  getInstitutionalUsers(): Observable<InstitutionalUser[]> {
+    return this.getAllUsers().pipe(
+      map(users => users.filter(user => 
+        user.role === 'institution_admin' || 
+        user.role === 'institution_teacher' || 
+        user.role === 'institution_staff'
+      ) as InstitutionalUser[])
+    );
+  }
+
+  // Verificar se email já existe (método auxiliar)
+  checkEmailExists(email: string): Observable<boolean> {
+    return this.getAllUsers().pipe(
+      map(users => users.some(user => user.email === email)),
+      catchError(() => {
+        // Se não conseguir buscar usuários, assume que email não existe
+        return throwError(() => new Error('Erro ao verificar email'));
+      })
+    );
   }
 }
