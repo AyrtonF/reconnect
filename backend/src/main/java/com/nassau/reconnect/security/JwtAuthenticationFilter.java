@@ -1,5 +1,7 @@
 package com.nassau.reconnect.security;
 
+import com.nassau.reconnect.security.CustomUserDetailsService;
+import com.nassau.reconnect.security.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,8 +34,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String jwt = getJwtFromRequest(request);
+            log.info("JwtAuthenticationFilter chamado para: {}", request.getRequestURI());
 
             if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+                log.info("Token JWT válido recebido");
                 String username = jwtTokenProvider.getUsernameFromJWT(jwt);
 
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
@@ -42,9 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Usuário autenticado: {}", username);
+            } else {
+                log.warn("Token JWT ausente ou inválido");
             }
         } catch (Exception ex) {
-            log.error("Could not set user authentication in security context", ex);
+            log.error("Não foi possível autenticar o usuário no contexto de segurança", ex);
         }
 
         filterChain.doFilter(request, response);

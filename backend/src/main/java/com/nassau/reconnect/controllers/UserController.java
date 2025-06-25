@@ -62,6 +62,9 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('INSTITUTION_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Token não enviado ou inválido"));
+        }
         String token = authorizationHeader.substring(7);
         Long id = jwtTokenProvider.getUserIdFromJWT(token);
         UserDto currentUser = userService.getUserById(id);

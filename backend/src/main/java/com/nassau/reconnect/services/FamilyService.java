@@ -51,17 +51,19 @@ public class FamilyService {
     public FamilyDto createFamily(FamilyCreateDto familyCreateDto) {
         Family family = familyMapper.toEntity(familyCreateDto);
 
-        // Add initial members
+        // Primeiro salva a família para garantir que ela tenha um ID
+        Family savedFamily = familyRepository.save(family);
+
+        // Depois associa os membros, se houver
         if (familyCreateDto.getInitialMembersIds() != null && !familyCreateDto.getInitialMembersIds().isEmpty()) {
             for (Long memberId : familyCreateDto.getInitialMembersIds()) {
                 User user = userRepository.findById(memberId)
                         .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + memberId));
-                user.getFamilies().add(family);
+                user.getFamilies().add(savedFamily);
                 userRepository.save(user);
             }
         }
 
-        Family savedFamily = familyRepository.save(family);
         return familyMapper.toDto(savedFamily);
     }
 

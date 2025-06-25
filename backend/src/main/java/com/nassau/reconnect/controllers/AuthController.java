@@ -62,7 +62,7 @@ public class AuthController {
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
-                .role(Role.USER)
+                .role(registerRequest.getRole())
                 .build();
 
         userService.createUser(userCreateDto);
@@ -76,7 +76,7 @@ public class AuthController {
 
         AuthResponse authResponse = AuthResponse.builder()
                 .token(token)
-                .role("USER")
+                .role(registerRequest.getRole().name())
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(authResponse, "Registration successful"));
