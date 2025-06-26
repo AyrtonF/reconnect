@@ -1,0 +1,8 @@
+{
+  "/api/*": {
+    "target": "https://reconnect-latest.onrender.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

@@ -1,6 +1,8 @@
+import { environment } from '../../environments/environment';
+
 export const APP_CONFIG = {
   // URLs da API
-  API_URL: 'http://localhost:8080/api',
+  API_URL: environment.apiUrl,
 
   // Configurações de autenticação
   AUTH: {

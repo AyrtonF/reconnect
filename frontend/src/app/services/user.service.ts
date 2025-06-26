@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { User, ApiResponse } from '../models/types';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 export type UserType = 'standard' | 'institutional';
 
@@ -57,23 +58,20 @@ interface UserDto {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
-  private readonly apiUrl = 'http://localhost:8080/api/users';
+  private readonly apiUrl = `${environment.apiUrl}/users`;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   // Método para obter headers com autorização
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': token || ''
+      Accept: 'application/json',
+      Authorization: token || '',
     });
   }
 
@@ -94,27 +92,28 @@ export class UserService {
       pendingChallengesIds: dto.pendingChallengesIds,
       imagesOfChallenge: dto.imagesOfChallenge,
       couponsIds: dto.couponsIds,
-      posts: dto.posts
+      posts: dto.posts,
     };
   }
 
   // Obter todos os usuários (apenas para admin/institution_admin)
   getAllUsers(): Observable<User[]> {
     const headers = this.getAuthHeaders();
-    
-    return this.http.get<ApiResponse<UserDto[]>>(`${this.apiUrl}`, { headers })
+
+    return this.http
+      .get<ApiResponse<UserDto[]>>(`${this.apiUrl}`, { headers })
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
-            return response.data.map(dto => this.mapDtoToUser(dto));
+            return response.data.map((dto) => this.mapDtoToUser(dto));
           } else {
             throw new Error(response.error || 'Failed to fetch users');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao buscar usuários:', error);
           let errorMessage = 'Erro ao buscar usuários';
-          
+
           if (error.status === 401) {
             errorMessage = 'Acesso não autorizado';
           } else if (error.status === 403) {
@@ -122,7 +121,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -131,20 +130,21 @@ export class UserService {
   // Obter usuário por ID
   getUserById(id: number): Observable<User | undefined> {
     const headers = this.getAuthHeaders();
-    
-    return this.http.get<ApiResponse<UserDto>>(`${this.apiUrl}/${id}`, { headers })
+
+    return this.http
+      .get<ApiResponse<UserDto>>(`${this.apiUrl}/${id}`, { headers })
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
             return this.mapDtoToUser(response.data);
           } else {
             throw new Error(response.error || 'User not found');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao buscar usuário:', error);
           let errorMessage = 'Erro ao buscar usuário';
-          
+
           if (error.status === 404) {
             errorMessage = 'Usuário não encontrado';
           } else if (error.status === 401) {
@@ -154,7 +154,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -163,20 +163,21 @@ export class UserService {
   // Obter usuário atual (logado)
   getCurrentUser(): Observable<User> {
     const headers = this.getAuthHeaders();
-    
-    return this.http.get<ApiResponse<UserDto>>(`${this.apiUrl}/me`, { headers })
+
+    return this.http
+      .get<ApiResponse<UserDto>>(`${this.apiUrl}/me`, { headers })
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
             return this.mapDtoToUser(response.data);
           } else {
             throw new Error(response.error || 'Failed to fetch current user');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao buscar usuário atual:', error);
           let errorMessage = 'Erro ao buscar dados do usuário';
-          
+
           if (error.status === 401) {
             errorMessage = 'Token inválido ou expirado';
             // Logout automático se token inválido
@@ -184,7 +185,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -193,20 +194,26 @@ export class UserService {
   // Obter usuários por instituição
   getUsersByInstitution(institutionId: number): Observable<User[]> {
     const headers = this.getAuthHeaders();
-    
-    return this.http.get<ApiResponse<UserDto[]>>(`${this.apiUrl}/institution/${institutionId}`, { headers })
+
+    return this.http
+      .get<ApiResponse<UserDto[]>>(
+        `${this.apiUrl}/institution/${institutionId}`,
+        { headers }
+      )
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
-            return response.data.map(dto => this.mapDtoToUser(dto));
+            return response.data.map((dto) => this.mapDtoToUser(dto));
           } else {
-            throw new Error(response.error || 'Failed to fetch institution users');
+            throw new Error(
+              response.error || 'Failed to fetch institution users'
+            );
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao buscar usuários da instituição:', error);
           let errorMessage = 'Erro ao buscar usuários da instituição';
-          
+
           if (error.status === 401) {
             errorMessage = 'Acesso não autorizado';
           } else if (error.status === 403) {
@@ -214,7 +221,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -223,7 +230,7 @@ export class UserService {
   // Criar novo usuário
   addUser(user: User | InstitutionalUser): Observable<User> {
     const headers = this.getAuthHeaders();
-    
+
     const createRequest: UserCreateRequest = {
       name: user.name,
       email: user.email,
@@ -231,22 +238,23 @@ export class UserService {
       role: user.role.toUpperCase() as 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN',
       institutionId: user.institutionId,
       phone: user.phone,
-      avatar: user.avatar
+      avatar: user.avatar,
     };
 
-    return this.http.post<ApiResponse<UserDto>>(`${this.apiUrl}`, createRequest, { headers })
+    return this.http
+      .post<ApiResponse<UserDto>>(`${this.apiUrl}`, createRequest, { headers })
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
             return this.mapDtoToUser(response.data);
           } else {
             throw new Error(response.error || 'Failed to create user');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao criar usuário:', error);
           let errorMessage = 'Erro ao criar usuário';
-          
+
           if (error.status === 400) {
             errorMessage = 'Dados inválidos para criação do usuário';
           } else if (error.status === 401) {
@@ -256,37 +264,44 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
   }
 
   // Atualizar usuário
-  updateUser(updatedUser: User | InstitutionalUser): Observable<User | undefined> {
+  updateUser(
+    updatedUser: User | InstitutionalUser
+  ): Observable<User | undefined> {
     const headers = this.getAuthHeaders();
-    
+
     const updateRequest: UserUpdateRequest = {
       name: updatedUser.name,
       phone: updatedUser.phone,
       avatar: updatedUser.avatar,
       // Só inclui password se foi fornecida
-      ...(updatedUser.password && { password: updatedUser.password })
+      ...(updatedUser.password && { password: updatedUser.password }),
     };
 
-    return this.http.put<ApiResponse<UserDto>>(`${this.apiUrl}/${updatedUser.id}`, updateRequest, { headers })
+    return this.http
+      .put<ApiResponse<UserDto>>(
+        `${this.apiUrl}/${updatedUser.id}`,
+        updateRequest,
+        { headers }
+      )
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success && response.data) {
             return this.mapDtoToUser(response.data);
           } else {
             throw new Error(response.error || 'Failed to update user');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao atualizar usuário:', error);
           let errorMessage = 'Erro ao atualizar usuário';
-          
+
           if (error.status === 400) {
             errorMessage = 'Dados inválidos para atualização';
           } else if (error.status === 401) {
@@ -298,7 +313,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -307,20 +322,21 @@ export class UserService {
   // Deletar usuário
   deleteUser(id: number): Observable<boolean> {
     const headers = this.getAuthHeaders();
-    
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, { headers })
+
+    return this.http
+      .delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, { headers })
       .pipe(
-        map(response => {
+        map((response) => {
           if (response.success) {
             return true;
           } else {
             throw new Error(response.error || 'Failed to delete user');
           }
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error('Erro ao deletar usuário:', error);
           let errorMessage = 'Erro ao deletar usuário';
-          
+
           if (error.status === 401) {
             errorMessage = 'Acesso não autorizado';
           } else if (error.status === 403) {
@@ -330,7 +346,7 @@ export class UserService {
           } else if (error.error?.error) {
             errorMessage = error.error.error;
           }
-          
+
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -339,18 +355,22 @@ export class UserService {
   // Métodos para compatibilidade com código existente
   getInstitutionalUsers(): Observable<InstitutionalUser[]> {
     return this.getAllUsers().pipe(
-      map(users => users.filter(user => 
-        user.role === 'institution_admin' || 
-        user.role === 'institution_teacher' || 
-        user.role === 'institution_staff'
-      ) as InstitutionalUser[])
+      map(
+        (users) =>
+          users.filter(
+            (user) =>
+              user.role === 'institution_admin' ||
+              user.role === 'institution_teacher' ||
+              user.role === 'institution_staff'
+          ) as InstitutionalUser[]
+      )
     );
   }
 
   // Verificar se email já existe (método auxiliar)
   checkEmailExists(email: string): Observable<boolean> {
     return this.getAllUsers().pipe(
-      map(users => users.some(user => user.email === email)),
+      map((users) => users.some((user) => user.email === email)),
       catchError(() => {
         // Se não conseguir buscar usuários, assume que email não existe
         return throwError(() => new Error('Erro ao verificar email'));

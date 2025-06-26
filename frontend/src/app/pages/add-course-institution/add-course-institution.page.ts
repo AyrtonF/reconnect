@@ -13,6 +13,7 @@ import { AddQuestionModalComponent } from '../../components/add-question-modal/a
 import { Router } from '@angular/router';
 import { CourseInstitutionService } from 'src/app/services/course-institution.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { environment } from '../../../environments/environment';
 import {
   InstitutionCourse,
   InstitutionMaterial,
@@ -593,9 +594,9 @@ export class AddCourseInstitutionPage implements OnInit {
     try {
       // Tentar endpoints alternativos
       const endpoints = [
-        'http://localhost:8080/api/courses', // Endpoint de cursos regulares
-        'http://localhost:8080/api/courses/institution', // Possível endpoint alternativo
-        'http://localhost:8080/api/admin/courses', // Endpoint administrativo
+        `${environment.apiUrl}/courses`, // Endpoint de cursos regulares
+        `${environment.apiUrl}/courses/institution`, // Possível endpoint alternativo
+        `${environment.apiUrl}/admin/courses`, // Endpoint administrativo
       ];
 
       for (const endpoint of endpoints) {
