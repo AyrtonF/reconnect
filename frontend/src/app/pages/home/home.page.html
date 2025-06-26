@@ -80,13 +80,13 @@
           <div class="progress-section">
             <div class="progress-text">
               <span
-                >Progresso: {{ course.progress?.percentageCompleted || 0
+                >Progresso: {{ course.progress.percentageCompleted || 0
                 }}%</span
               >
-              <span>{{ course.score?.current || 0 }} pts</span>
+              <span>{{ course.score.current || 0 }} pts</span>
             </div>
             <ion-progress-bar
-              [value]="(course.progress?.percentageCompleted || 0) / 100"
+              [value]="(course.progress.percentageCompleted || 0) / 100"
               color="warning"
             >
             </ion-progress-bar>
