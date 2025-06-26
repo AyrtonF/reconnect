@@ -42,6 +42,11 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/coupons/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/institutions/**").permitAll()
+                        // Institution Courses permissions
+                        .requestMatchers(HttpMethod.POST, "/api/institution-courses", "/institution-courses").hasAnyRole("INSTITUTION_ADMIN", "INSTITUTION_STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/institution-courses/**", "/institution-courses/**").hasAnyRole("INSTITUTION_ADMIN", "INSTITUTION_STAFF", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/institution-courses/**", "/institution-courses/**").hasAnyRole("INSTITUTION_ADMIN", "INSTITUTION_STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/institution-courses/**", "/institution-courses/**").hasRole("INSTITUTION_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions().sameOrigin())

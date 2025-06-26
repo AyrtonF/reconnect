@@ -33,13 +33,15 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Initializing sample data...");
 
+        // Create default institutions first
+        createDefaultInstitutions();
+
         // Create users
         User admin = createAdmin();
         User user1 = createUser("André", "andre@gmail.com");
         User user2 = createUser("Maria", "maria@gmail.com");
 
         // Create institution
-        Institution institution = createInstitution();
 
         // Create family
         Family family = createFamily(Arrays.asList(user1, user2));
@@ -88,28 +90,6 @@ public class DataInitializer implements CommandLineRunner {
         return userRepository.save(user);
     }
 
-    private Institution createInstitution() {
-        Institution institution = new Institution();
-        institution.setName("Reconnect Center");
-        institution.setEmail("contact@reconnectcenter.com");
-        institution.setPhone("(81) 3333-4444");
-        institution.setDescription("Centro especializado em combater a dependência digital");
-        institution.setStatus(InstitutionStatus.ACTIVE);
-
-        Institution.Settings settings = new Institution.Settings();
-        settings.setAllowEnrollment(true);
-        settings.setRequireApproval(false);
-        settings.setMaxStudentsPerCourse(50);
-        institution.setSettings(settings);
-
-        Institution.SocialMedia socialMedia = new Institution.SocialMedia();
-        socialMedia.setWebsite("https://reconnectcenter.com");
-        socialMedia.setFacebook("reconnectcenter");
-        socialMedia.setInstagram("reconnect_center");
-        institution.setSocialMedia(socialMedia);
-
-        return institutionRepository.save(institution);
-    }
 
     private Family createFamily(List<User> members) {
         Family family = new Family();
@@ -205,5 +185,37 @@ public class DataInitializer implements CommandLineRunner {
         course.setModules(new ArrayList<>(Collections.singletonList(module)));
 
         return courseRepository.save(course);
+    }
+
+    private void createDefaultInstitutions() {
+        // Criar a instituição "Secretaria de Educação" com ID 1 se não existir
+        if (!institutionRepository.existsById(1L)) {
+            log.info("Creating default institution: Secretaria de Educação");
+
+            Institution secretariaEducacao = new Institution();
+            secretariaEducacao.setId(1L);
+            secretariaEducacao.setName("Secretaria de Educação");
+            secretariaEducacao.setEmail("contato@secretariaeducacao.gov.br");
+            secretariaEducacao.setPhone("(81) 3183-8000");
+            secretariaEducacao.setDescription("Secretaria de Educação responsável pela gestão educacional");
+            secretariaEducacao.setStatus(InstitutionStatus.ACTIVE);
+
+            Institution.Settings settings = new Institution.Settings();
+            settings.setAllowEnrollment(true);
+            settings.setRequireApproval(false);
+            settings.setMaxStudentsPerCourse(100);
+            secretariaEducacao.setSettings(settings);
+
+            Institution.SocialMedia socialMedia = new Institution.SocialMedia();
+            socialMedia.setWebsite("https://secretariaeducacao.gov.br");
+            socialMedia.setFacebook("secretariaeducacao");
+            socialMedia.setInstagram("secretaria_educacao");
+            secretariaEducacao.setSocialMedia(socialMedia);
+
+            institutionRepository.save(secretariaEducacao);
+            log.info("Successfully created Secretaria de Educação with ID: 1");
+        } else {
+            log.info("Secretaria de Educação already exists with ID: 1");
+        }
     }
 }

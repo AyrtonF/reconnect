@@ -6,8 +6,10 @@ import com.nassau.reconnect.dtos.challenge.ChallengeDto;
 import com.nassau.reconnect.models.enums.ChallengeStatus;
 import com.nassau.reconnect.models.enums.ChallengeType;
 import com.nassau.reconnect.services.ChallengeService;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequestMapping("/challenges")
 @RequiredArgsConstructor
 @CrossOrigin
+@Slf4j
 public class ChallengeController {
 
     private final ChallengeService challengeService;
@@ -102,6 +105,54 @@ public class ChallengeController {
         } else {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Failed to complete challenge", "User may not be participating in this challenge"));
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            // Criar primeiro desafio - Físico
+            if (!challengeExists("Caminhada Diária")) {
+                ChallengeCreateDto challenge1 = ChallengeCreateDto.builder()
+                        .title("Caminhada Diária")
+                        .description("Faça uma caminhada de pelo menos 30 minutos todos os dias por uma semana")
+                        .score(150)
+                        .type(ChallengeType.PHYSICAL)
+                        .familyId(null) // Desafio geral, não específico de uma família
+                        .build();
+
+                challengeService.createChallenge(challenge1);
+                log.info("Desafio 'Caminhada Diária' criado com sucesso");
+            }
+
+            // Criar segundo desafio - Intelectual
+            if (!challengeExists("Leitura Semanal")) {
+                ChallengeCreateDto challenge2 = ChallengeCreateDto.builder()
+                        .title("Leitura Semanal")
+                        .description("Leia pelo menos 1 livro ou 3 artigos educativos durante a semana")
+                        .score(100)
+                        .type(ChallengeType.INTELLECTUAL)
+                        .familyId(null) // Desafio geral, não específico de uma família
+                        .build();
+
+                challengeService.createChallenge(challenge2);
+                log.info("Desafio 'Leitura Semanal' criado com sucesso");
+            }
+
+            log.info("Inicialização de desafios padrão concluída");
+
+        } catch (Exception e) {
+            log.error("Erro ao criar desafios padrão: {}", e.getMessage());
+        }
+    }
+
+    private boolean challengeExists(String title) {
+        try {
+            List<ChallengeDto> allChallenges = challengeService.getAllChallenges();
+            return allChallenges.stream().anyMatch(challenge -> challenge.getTitle().equals(title));
+        } catch (Exception e) {
+            log.warn("Erro ao verificar se desafio existe: {}", e.getMessage());
+            return false;
         }
     }
 }

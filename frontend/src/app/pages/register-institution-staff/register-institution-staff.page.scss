@@ -1,0 +1,121 @@
+.container {
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title h2 {
+  color: #2d3748;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #718096;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.section-title {
+  margin: 25px 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.section-title h3 {
+  color: #4a5568;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #2d3748;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.input {
+  --background: #f7fafc;
+  --border-color: #e2e8f0;
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --color: #2d3748;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: 4px;
+}
+
+.input:focus-within {
+  --border-color: #ed8936;
+  box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.1);
+}
+
+.register-button {
+  --background: #ed8936;
+  --background-hover: #dd7724;
+  --color: white;
+  --border-radius: 8px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  margin-top: 25px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 1rem;
+}
+
+.register-button:hover {
+  --background: #dd7724;
+}
+
+.register-button[disabled] {
+  --background: #a0aec0;
+  --color: #ffffff;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.login-link a {
+  color: #ed8936;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+ion-header ion-toolbar {
+  --background: #f7fafc;
+}
+
+ion-header ion-title {
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+ion-spinner {
+  margin-right: 8px;
+  --color: white;
+}

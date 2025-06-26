@@ -22,6 +22,19 @@
   <div class="container">
     <h2>Bem-vindo, <span class="green-text">{{ username }}</span>!</h2>
 
+    <!-- Informações da família -->
+    <div class="family-info" *ngIf="familyName">
+      <p class="family-text">
+        <ion-icon name="people-outline"></ion-icon>
+        <span *ngIf="familyName !== 'Sem família'"
+          >Família: <strong>{{ familyName }}</strong></span
+        >
+        <span *ngIf="familyName === 'Sem família'" class="no-family">
+          Você ainda não faz parte de uma família
+        </span>
+      </p>
+    </div>
+
     <!-- Blocos de ações -->
     <div class="grid-buttons">
       <ion-card class="action-card">
@@ -37,6 +50,11 @@
       <ion-card class="action-card" (click)="navigateToPage('family-details')">
         <ion-icon name="people-outline"></ion-icon>
         <p>Família</p>
+      </ion-card>
+
+      <ion-card class="action-card" (click)="navigateToPage('add-family')">
+        <ion-icon name="people-circle-outline"></ion-icon>
+        <p>Criar/Entrar<br /><span>Família</span></p>
       </ion-card>
 
       <ion-card class="action-card" (click)="navigateToPage('courses')">
@@ -78,7 +96,7 @@
             expand="block"
             color="warning"
             class="access-button"
-            (click)="accessCourse(course.id)"
+            (click)="accessCourse(course)"
           >
             ACESSAR CURSO
           </ion-button>

@@ -5,7 +5,7 @@ import { NavController } from '@ionic/angular';
   selector: 'app-main',
   templateUrl: './main.page.html',
   styleUrls: ['./main.page.scss'],
-  standalone:false
+  standalone: false,
 })
 export class MainPage {
   constructor(private navCtrl: NavController) {}
@@ -15,6 +15,7 @@ export class MainPage {
   }
 
   register() {
-    this.navCtrl.navigateForward('/register');
+    // Redireciona para a nova página de seleção de tipo de usuário
+    this.navCtrl.navigateForward('/user-type-selection');
   }
 }

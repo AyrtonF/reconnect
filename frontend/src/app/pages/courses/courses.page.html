@@ -21,16 +21,32 @@
 
   <div class="courses-container">
     <div *ngFor="let course of courses$ | async" class="course-card">
-      <img [src]="course.thumbnail" [alt]="course.title" class="course-image">
+      <img [src]="course.thumbnail" [alt]="course.title" class="course-image" />
       <div class="course-content">
         <h2 class="course-title">{{ course.title }}</h2>
         <p class="course-description">{{ course.description }}</p>
-        <ion-button 
-          expand="block" 
+
+        <!-- Botão para cursos não matriculados -->
+        <ion-button
+          *ngIf="!course.isEnrolled"
+          expand="block"
           class="start-button"
-          (click)="startCourse(course)"
+          (click)="enrollInCourse(course)"
         >
-          Iniciar curso
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Inscrever-se
+        </ion-button>
+
+        <!-- Botão para cursos matriculados -->
+        <ion-button
+          *ngIf="course.isEnrolled"
+          expand="block"
+          class="enrolled-button"
+          color="success"
+          (click)="goToCourseDetails(course)"
+        >
+          <ion-icon name="play-outline" slot="start"></ion-icon>
+          Continuar curso
         </ion-button>
       </div>
     </div>

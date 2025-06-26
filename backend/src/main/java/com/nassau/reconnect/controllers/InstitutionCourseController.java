@@ -60,7 +60,7 @@ public class InstitutionCourseController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasPermission(null, 'InstitutionCourse', 'CREATE')")
+    @PreAuthorize("hasRole('ADMIN') or hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_STAFF')")
     public ResponseEntity<ApiResponse<InstitutionCourseDto>> createCourse(@Valid @RequestBody InstitutionCourseCreateDto courseCreateDto) {
         InstitutionCourseDto createdCourse = institutionCourseService.createCourse(courseCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -77,7 +77,7 @@ public class InstitutionCourseController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasPermission(#id, 'InstitutionCourse', 'DELETE')")
+    @PreAuthorize("hasRole('ADMIN') or @institutionCourseSecurity.canDeleteCourse(#id)")
     public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable Long id) {
         institutionCourseService.deleteCourse(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Institution course deleted successfully"));

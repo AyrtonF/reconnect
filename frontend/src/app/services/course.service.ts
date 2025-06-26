@@ -64,17 +64,15 @@ export class CourseService {
       );
   }
 
-  getCourseById(id: number): Observable<Course> {
-    // Se o ID é maior que 1000, é um curso institucional convertido
-    if (id > 1000) {
+  getCourseById(id: number, isInstitutional?: boolean): Observable<Course> {
+    // Usar parâmetro isInstitutional ou tentar ambos os endpoints
+    if (isInstitutional) {
       return this.http
-        .get<ApiResponse<InstitutionCourse>>(
-          `${this.institutionApiUrl}/${id - 1000}`
-        )
+        .get<ApiResponse<InstitutionCourse>>(`${this.institutionApiUrl}/${id}`)
         .pipe(
           map((response) => {
             if (!response.data) throw new Error('Course not found');
-            return this.convertInstitutionToStudentCourse(response.data, id);
+            return this.convertInstitutionToStudentCourse(response.data);
           }),
           catchError(this.errorHandler.handleError)
         );
@@ -214,7 +212,7 @@ export class CourseService {
     contentType: 'video' | 'text' | 'quiz',
     contentId: number
   ): Observable<Course> {
-    const userId = this.authService.getCurrentUserId();
+    const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
     }
@@ -244,7 +242,9 @@ export class CourseService {
 
   // Método de conveniência para matrícula sem precisar passar userId
   enrollInCourseCurrentUser(courseId: number): Observable<boolean> {
-    const userId = this.authService.getCurrentUserId();
+
+  
+    const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
     }
@@ -275,7 +275,7 @@ export class CourseService {
     overrideId?: number
   ): Course {
     return {
-      id: overrideId || instCourse.id + 1000, // Evitar conflito de IDs
+      id: overrideId || instCourse.id, // Usar ID real do curso institucional
       title: instCourse.name,
       description: instCourse.description,
       instructor: 'Instrutor Institucional',
@@ -304,6 +304,104 @@ export class CourseService {
       updatedAt: instCourse.updatedAt,
       tags: [],
       prerequisites: [],
-    };
+      // Adicionar propriedades para identificar como curso institucional
+      institutionId: instCourse.institutionId,
+      isInstitutional: true,
+    } as Course;
+  }
+
+  // Método para marcar curso como matriculado localmente
+  markCourseAsEnrolled(courseId: number): void {
+    // Este método seria usado para atualizar o estado local do curso
+    console.log(`Curso ${courseId} marcado como matriculado localmente`);
+  }
+
+  // Método simplificado para obter cursos sem depender de endpoints específicos
+  getCoursesForExploration(): Observable<Course[]> {
+    return this.getAllCourses().pipe(
+      map((courses) => {
+        // Por enquanto, retornar todos os cursos
+        // Futuramente, filtrar baseado em matrículas conhecidas
+        return courses;
+      }),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  // Método para obter cursos matriculados
+  getEnrolledCourses(userId?: number): Observable<Course[]> {
+    const userIdToUse = userId || this.authService.getUserId();
+    if (!userIdToUse) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+
+    // Tentar endpoint específico, com fallback para método alternativo
+    return this.http
+      .get<ApiResponse<Course[]>>(`${this.apiUrl}/user/${userIdToUse}/enrolled`)
+      .pipe(
+        map((response) => response.data || []),
+        catchError((error) => {
+          console.warn(
+            'Endpoint de cursos matriculados não disponível, usando fallback:',
+            error
+          );
+          // Fallback: obter todos os cursos e filtrar pelos matriculados
+          return this.getAllCourses().pipe(
+            map((courses) => courses.filter((course) => course.isEnrolled))
+          );
+        })
+      );
+  }
+
+  // Método para obter apenas cursos disponíveis (não matriculados)
+  getAvailableCourses(): Observable<Course[]> {
+    const userId = this.authService.getUserId();
+    if (!userId) {
+      return this.getAllCourses();
+    }
+
+    return combineLatest([
+      this.getAllCourses(),
+      this.getEnrolledCourses(userId),
+    ]).pipe(
+      map(([allCourses, enrolledCourses]) => {
+        const enrolledIds = enrolledCourses.map((course: Course) => course.id);
+        return allCourses.filter(
+          (course: Course) => !enrolledIds.includes(course.id)
+        );
+      }),
+      catchError((error) => {
+        console.warn(
+          'Erro ao obter cursos disponíveis, retornando todos os cursos:',
+          error
+        );
+        // Em caso de erro, retornar todos os cursos
+        return this.getAllCourses();
+      })
+    );
+  }
+
+  // Método para verificar se usuário está matriculado
+  isUserEnrolled(courseId: number, userId?: number): Observable<boolean> {
+    const userIdToUse = userId || this.authService.getUserId();
+    if (!userIdToUse) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+
+    return this.http
+      .get<ApiResponse<boolean>>(
+        `${this.apiUrl}/${courseId}/enrolled/${userIdToUse}`
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError((error) => {
+          console.warn(
+            'Endpoint de verificação de matrícula não disponível:',
+            error
+          );
+          // Fallback: assumir que não está matriculado
+          return throwError(() => new Error('Cannot verify enrollment status'));
+        })
+      );
   }
 }

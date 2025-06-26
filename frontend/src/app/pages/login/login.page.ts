@@ -51,7 +51,13 @@ export class LoginPage {
         this.authService.getCurrentUser().subscribe({
           next: (user) => {
             if (user?.id) {
+              console.log("entrou no if do user id")
               this.authService.saveUserId(user.id);
+            }
+
+            // Salvar institutionId se disponível
+            if (user?.institutionId) {
+              this.authService.saveInstitutionId(user.institutionId);
             }
 
             // Redirecionar baseado no role
@@ -88,7 +94,7 @@ export class LoginPage {
   }
 
   goToSignUp() {
-    this.navCtrl.navigateForward('/register');
+    this.navCtrl.navigateForward('/user-type-selection');
   }
 
   goBack() {

@@ -1,0 +1,110 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Criar Família</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="add-family-content">
+  <div class="container">
+    <div class="header-section">
+      <ion-icon name="people-outline" class="main-icon"></ion-icon>
+      <h2>Crie sua Família</h2>
+      <p>Una-se aos seus entes queridos e participem juntos dos desafios!</p>
+    </div>
+
+    <form (ngSubmit)="createFamily()" #familyForm="ngForm">
+      <ion-card class="form-card">
+        <ion-card-content>
+          <!-- Nome da Família -->
+          <ion-item lines="none" class="form-item">
+            <ion-label position="stacked">Nome da Família *</ion-label>
+            <ion-input
+              [(ngModel)]="familyData.name"
+              name="familyName"
+              placeholder="Ex: Família Silva"
+              required
+              #familyName="ngModel"
+              [class.error]="familyName.invalid && familyName.touched"
+            ></ion-input>
+          </ion-item>
+          <div
+            *ngIf="familyName.invalid && familyName.touched"
+            class="error-message"
+          >
+            Nome da família é obrigatório
+          </div>
+
+          <!-- Botão de criar -->
+          <ion-button
+            expand="block"
+            type="submit"
+            class="create-button"
+            [disabled]="familyForm.invalid || isLoading"
+          >
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <span *ngIf="!isLoading">Criar Família</span>
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </form>
+
+    <!-- Ou participar de uma família existente -->
+    <div class="divider">
+      <span>OU</span>
+    </div>
+
+    <ion-card class="join-card">
+      <ion-card-content>
+        <h3>Participar de uma Família</h3>
+        <p>Procure por uma família existente e solicite para participar</p>
+
+        <ion-item lines="none" class="search-item">
+          <ion-label position="stacked">Buscar Família</ion-label>
+          <ion-input
+            [(ngModel)]="searchTerm"
+            placeholder="Digite o nome da família"
+            (ionInput)="searchFamilies()"
+          ></ion-input>
+          <ion-icon
+            name="search-outline"
+            slot="end"
+            class="search-icon"
+          ></ion-icon>
+        </ion-item>
+
+        <!-- Resultados da busca -->
+        <div *ngIf="searchResults.length > 0" class="search-results">
+          <div *ngFor="let family of searchResults" class="family-result">
+            <div class="family-info">
+              <h4>{{ family.name }}</h4>
+              <p>{{ family.membersIds?.length || 0 }} membros</p>
+            </div>
+            <ion-button
+              fill="outline"
+              size="small"
+              (click)="joinFamily(family.id)"
+              [disabled]="isJoining"
+            >
+              <ion-spinner
+                *ngIf="isJoining"
+                name="crescent"
+                size="small"
+              ></ion-spinner>
+              <span *ngIf="!isJoining">Participar</span>
+            </ion-button>
+          </div>
+        </div>
+
+        <div
+          *ngIf="searchTerm && searchResults.length === 0"
+          class="no-results"
+        >
+          <p>Nenhuma família encontrada com esse nome.</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

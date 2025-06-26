@@ -183,6 +183,10 @@ export type StudentCourse = {
   updatedAt: Date;
   tags: string[];
   prerequisites?: string[];
+
+  // Propriedades para identificar cursos institucionais
+  institutionId?: number;
+  isInstitutional?: boolean;
 };
 
 // Alias for backwards compatibility

@@ -19,6 +19,68 @@
     padding: 16px;
     margin-bottom: 20px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+
+    .challenge-indicators {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+
+      .challenge-chip {
+        height: 28px;
+
+        ion-icon {
+          margin-right: 4px;
+        }
+      }
+
+      .validated-chip {
+        ion-icon {
+          color: white;
+        }
+      }
+
+      .pending-chip {
+        ion-icon {
+          color: #333;
+        }
+      }
+    }
+
+    .likes-and-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+
+      .likes {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        ion-icon {
+          font-size: 1.2rem;
+          color: #666;
+
+          &.liked {
+            color: var(--ion-color-danger);
+          }
+        }
+
+        span {
+          color: #666;
+          font-size: 0.9rem;
+        }
+      }
+
+      ion-button {
+        --border-radius: 20px;
+        --padding-start: 12px;
+        --padding-end: 12px;
+        height: 32px;
+        font-size: 0.85rem;
+      }
+    }
   }
 
   .user-info {
@@ -56,14 +118,6 @@
     border-radius: 12px;
     margin-bottom: 8px;
     object-fit: cover;
-  }
-
-  .likes {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    color: #2e7d63;
   }
 
   @media (min-width: 768px) {

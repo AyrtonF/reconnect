@@ -19,7 +19,7 @@ interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN';
+  role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' | 'INSTITUTION_STAFF';
 }
 
 @Injectable({
@@ -117,7 +117,7 @@ export class AuthService {
     name: string,
     email: string,
     password: string,
-    role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' = 'USER'
+    role: 'USER' | 'ADMIN' | 'INSTITUTION_ADMIN' | 'INSTITUTION_STAFF' = 'USER'
   ): Observable<AuthResponse> {
     // Validação básica no frontend
     if (!name || !email || !password) {
@@ -210,7 +210,9 @@ export class AuthService {
       case 'ADMIN':
         return '/home'; // Redireciona para home até criar página específica de admin
       case 'INSTITUTION_ADMIN':
-        return '/home-company'; // Página já existe para instituições
+        return '/course-institution'; // Página específica para administradores de instituição
+      case 'INSTITUTION_STAFF':
+        return '/home-company'; // Página específica para staff da empresa
       case 'USER':
       default:
         return '/home'; // Página padrão para usuários
@@ -252,10 +254,23 @@ export class AuthService {
     localStorage.setItem('userId', userId.toString());
   }
 
-  // Método para obter o ID do usuário atual
-  getCurrentUserId(): number | null {
+  // Método para obter o ID do usuário
+  getUserId(): number | null {
     const userId = localStorage.getItem('userId');
     return userId ? parseInt(userId, 10) : null;
+  }
+
+  // Método para salvar o ID da instituição
+  saveInstitutionId(institutionId: number): void {
+    localStorage.setItem('institutionId', institutionId.toString());
+  }
+
+  // Método para obter o ID da instituição
+  getInstitutionId(): number | null {
+    // const institutionId = localStorage.getItem('institutionId');
+    // return institutionId ? parseInt(institutionId, 10) : null;
+
+    return 1;
   }
 
   // Método para obter informações do usuário atual do backend
@@ -273,6 +288,7 @@ export class AuthService {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
+    localStorage.removeItem('institutionId');
   }
 
   // Método para verificar se o usuário está logado
@@ -294,6 +310,10 @@ export class AuthService {
 
   isInstitutionAdmin(): boolean {
     return this.hasRole('INSTITUTION_ADMIN');
+  }
+
+  isInstitutionStaff(): boolean {
+    return this.hasRole('INSTITUTION_STAFF');
   }
 
   isUser(): boolean {

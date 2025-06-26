@@ -153,4 +153,29 @@ export class CourseInstitutionService {
       )
       .pipe(catchError(this.errorHandler.handleError));
   }
+
+  // Matricular usuário em curso institucional
+  enrollUserInCourse(courseId: number, userId: number): Observable<boolean> {
+    return this.http
+      .post<ApiResponse<boolean>>(
+        `${this.apiUrl}/${courseId}/enroll/${userId}`,
+        {}
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
+
+  // Verificar se usuário está matriculado em curso institucional
+  isUserEnrolled(courseId: number, userId: number): Observable<boolean> {
+    return this.http
+      .get<ApiResponse<boolean>>(
+        `${this.apiUrl}/${courseId}/enrollment/${userId}`
+      )
+      .pipe(
+        map((response) => response.data || false),
+        catchError(this.errorHandler.handleError)
+      );
+  }
 }

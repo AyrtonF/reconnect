@@ -7,7 +7,7 @@
     </ion-buttons>
     <ion-title class="green-text">{{ challenge?.title}}</ion-title>
 
-     <ion-buttons slot="end">
+    <ion-buttons slot="end">
       <ion-menu-button side="end" color="primary"></ion-menu-button>
     </ion-buttons>
   </ion-toolbar>
@@ -25,19 +25,42 @@
       <p class="label"><strong>Participantes</strong></p>
       <div class="avatars-row">
         <ion-avatar *ngFor="let participant of participants">
-          <img [src]="participant.avatar != undefined ? participant.avatar : '../../../assets/images/default-user.png' "
-            alt="{{ participant.name }}" />
+          <img
+            [src]="participant.avatar != undefined ? participant.avatar : '../../../assets/images/default-user.png' "
+            alt="{{ participant.name }}"
+          />
         </ion-avatar>
       </div>
     </div>
 
     <div class="button-group">
-      <ion-button expand="block">
-        <ion-icon name="attach-outline" slot="start"></ion-icon>
-        Registrar atividade
+      <!-- Mostrar foto registrada se houver -->
+      <div class="activity-photo" *ngIf="challengeActivityImage">
+        <p class="label"><strong>Atividade Registrada:</strong></p>
+        <img
+          [src]="challengeActivityImage"
+          alt="Atividade registrada"
+          class="registered-photo"
+        />
+      </div>
+
+      <ion-button
+        expand="block"
+        (click)="registerActivity()"
+        [color]="isRegistered ? 'success' : 'primary'"
+      >
+        <ion-icon name="camera-outline" slot="start"></ion-icon>
+        {{ isRegistered ? 'Atividade Registrada' : 'Registrar Atividade' }}
       </ion-button>
-      <ion-button expand="block">
-        Concluir desafio
+
+      <ion-button
+        expand="block"
+        (click)="completeChallenge()"
+        color="secondary"
+        [disabled]="!isRegistered"
+      >
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Concluir Desafio
       </ion-button>
     </div>
   </div>

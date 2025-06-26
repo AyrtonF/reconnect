@@ -146,17 +146,27 @@
           </ion-button>
 
           <div class="questions-list" *ngIf="courseData.questions.length > 0">
-            <div class="question" *ngFor="let question of courseData.questions; let i = index">
+            <div
+              class="question"
+              *ngFor="let question of courseData.questions; let i = index"
+            >
               <div class="question-header">
-                <p class="question-text">Pergunta {{ i + 1 }}: {{ question.question }}</p>
-                <ion-button fill="clear" color="danger" (click)="deleteQuestion(question.id)">
+                <p class="question-text">
+                  Pergunta {{ i + 1 }}: {{ question.question }}
+                </p>
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="deleteQuestion(question.id)"
+                >
                   <ion-icon name="trash-outline"></ion-icon>
                 </ion-button>
               </div>
               <div class="alternatives">
-                <button 
+                <button
                   *ngFor="let alt of question.alternatives; let j = index"
-                  [class.correct]="j === question.correctAnswer">
+                  [class.correct]="j === question.correctAnswer"
+                >
                   {{ ['A', 'B', 'C', 'D'][j] }}
                 </button>
               </div>
@@ -167,6 +177,7 @@
     </div>
 
     <!-- Save Button -->
+
     <ion-button
       expand="block"
       color="success"

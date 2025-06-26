@@ -100,7 +100,7 @@ export class FamilyService {
 
   // Métodos de conveniência para trabalhar com o usuário atual
   joinFamilyCurrentUser(familyId: number): Observable<boolean> {
-    const userId = this.authService.getCurrentUserId();
+    const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
     }
@@ -108,7 +108,7 @@ export class FamilyService {
   }
 
   leaveFamilyCurrentUser(familyId: number): Observable<boolean> {
-    const userId = this.authService.getCurrentUserId();
+    const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
     }
@@ -116,7 +116,7 @@ export class FamilyService {
   }
 
   getCurrentUserFamilies(): Observable<Family[]> {
-    const userId = this.authService.getCurrentUserId();
+    const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
     }

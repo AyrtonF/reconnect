@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Tipo de Cadastro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <div class="title">
+      <h2>Escolha seu tipo de cadastro</h2>
+      <p class="subtitle">
+        Selecione a opção que melhor se adequa ao seu perfil
+      </p>
+    </div>
+
+    <div class="user-type-cards">
+      <ion-card class="user-type-card" (click)="selectUserType('USER')">
+        <ion-card-content>
+          <div class="card-icon">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <h3>Usuário</h3>
+          <p>
+            Para pessoas físicas que desejam participar de cursos e desafios
+          </p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card
+        class="user-type-card"
+        (click)="selectUserType('INSTITUTION_ADMIN')"
+      >
+        <ion-card-content>
+          <div class="card-icon">
+            <ion-icon name="business-outline"></ion-icon>
+          </div>
+          <h3>Administrador de Instituição</h3>
+          <p>Para administradores de instituições educacionais</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card
+        class="user-type-card"
+        (click)="selectUserType('INSTITUTION_STAFF')"
+      >
+        <ion-card-content>
+          <div class="card-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <h3>Staff da Empresa</h3>
+          <p>Para funcionários de empresas parceiras</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

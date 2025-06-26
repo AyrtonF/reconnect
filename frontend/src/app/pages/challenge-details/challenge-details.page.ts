@@ -2,10 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChallengeService } from '../../services/challenge.service';
 import { UserService } from '../../services/user.service';
-import { Challenge, User } from '../../models/types';
+import { PostService } from '../../services/post.service';
+import { FamilyService } from '../../services/family.service';
+import { AuthService } from '../../services/auth.service';
+import { Challenge, User, Post, Family } from '../../models/types';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { NavController } from '@ionic/angular';
+import {
+  NavController,
+  ActionSheetController,
+  AlertController,
+  LoadingController,
+  ToastController,
+  ModalController,
+} from '@ionic/angular';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 @Component({
   selector: 'app-challenge-details',
@@ -16,16 +27,45 @@ import { NavController } from '@ionic/angular';
 export class ChallengeDetailsPage implements OnInit {
   challenge: Challenge | undefined;
   participants: User[] = [];
+  currentUserId: number = 0;
+  userFamily: Family | null = null;
+  challengeActivityImage: string = '';
+  isRegistered: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private challengeService: ChallengeService,
     private userService: UserService,
-    private navCtrl: NavController
+    private postService: PostService,
+    private familyService: FamilyService,
+    private authService: AuthService,
+    private navCtrl: NavController,
+    private actionSheetController: ActionSheetController,
+    private alertController: AlertController,
+    private loadingController: LoadingController,
+    private toastController: ToastController,
+    private modalController: ModalController
   ) {}
 
   ngOnInit(): void {
+    this.currentUserId = this.authService.getUserId() || 0;
     this.loadChallengeDetails();
+    this.loadUserFamily();
+  }
+
+  loadUserFamily() {
+    if (this.currentUserId) {
+      this.familyService.getUserFamilies(this.currentUserId).subscribe({
+        next: (families: Family[]) => {
+          if (families && families.length > 0) {
+            this.userFamily = families[0];
+          }
+        },
+        error: (error: any) => {
+          console.error('Erro ao carregar família:', error);
+        },
+      });
+    }
   }
 
   loadChallengeDetails() {
@@ -77,5 +117,155 @@ export class ChallengeDetailsPage implements OnInit {
           }
         );
     }
+  }
+
+  // Método para registrar atividade do desafio
+  async registerActivity() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Registrar Atividade',
+      buttons: [
+        {
+          text: 'Câmera',
+          icon: 'camera',
+          handler: () => {
+            this.takePhoto(CameraSource.Camera);
+          },
+        },
+        {
+          text: 'Galeria',
+          icon: 'images',
+          handler: () => {
+            this.takePhoto(CameraSource.Photos);
+          },
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel',
+        },
+      ],
+    });
+    await actionSheet.present();
+  }
+
+  async takePhoto(source: CameraSource) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.DataUrl,
+        source: source,
+      });
+
+      this.challengeActivityImage = image.dataUrl || '';
+      this.isRegistered = true;
+
+      await this.showToast(
+        'Foto registrada! Agora você pode concluir o desafio.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Erro ao capturar foto:', error);
+      await this.showToast('Erro ao capturar foto', 'danger');
+    }
+  }
+
+  // Método para concluir desafio
+  async completeChallenge() {
+    if (!this.isRegistered || !this.challengeActivityImage) {
+      await this.showAlert(
+        'Atenção',
+        'Você precisa registrar uma atividade antes de concluir o desafio.'
+      );
+      return;
+    }
+
+    if (!this.userFamily) {
+      await this.showAlert(
+        'Erro',
+        'Você precisa fazer parte de uma família para concluir desafios.'
+      );
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Concluir Desafio',
+      message:
+        'Tem certeza que deseja concluir este desafio? Um post será criado na página da família para validação.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Concluir',
+          handler: async () => {
+            await this.submitChallengeCompletion();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async submitChallengeCompletion() {
+    const loading = await this.loadingController.create({
+      message: 'Enviando conclusão do desafio...',
+    });
+    await loading.present();
+
+    try {
+      // Criar post na família
+      const newPost: Omit<Post, 'id'> = {
+        userId: this.currentUserId,
+        familyId: this.userFamily!.id,
+        caption: `Completei o desafio: ${
+          this.challenge?.title
+        }! 🎉\n\nAguardando validação da família para receber ${
+          this.challenge?.score || 0
+        } pontos.`,
+        image: this.challengeActivityImage,
+        likes: 0,
+        timestamp: new Date().toISOString(),
+      };
+
+      await this.postService.addPost(newPost).toPromise();
+
+      await loading.dismiss();
+      await this.showToast(
+        'Desafio enviado para validação da família!',
+        'success'
+      );
+
+      // Navegar para página da família
+      this.navCtrl.navigateForward('/family-details');
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Erro ao concluir desafio:', error);
+      await this.showAlert(
+        'Erro',
+        'Não foi possível enviar a conclusão do desafio.'
+      );
+    }
+  }
+
+  private async showToast(message: string, color: string = 'medium') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'top',
+    });
+    await toast.present();
+  }
+
+  private async showAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK'],
+    });
+    await alert.present();
   }
 }

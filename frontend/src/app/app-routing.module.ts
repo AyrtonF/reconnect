@@ -32,6 +32,34 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'user-type-selection',
+    loadChildren: () =>
+      import('./pages/user-type-selection/user-type-selection.module').then(
+        (m) => m.UserTypeSelectionPageModule
+      ),
+  },
+  {
+    path: 'register-user',
+    loadChildren: () =>
+      import('./pages/register-user/register-user.module').then(
+        (m) => m.RegisterUserPageModule
+      ),
+  },
+  {
+    path: 'register-institution-admin',
+    loadChildren: () =>
+      import(
+        './pages/register-institution-admin/register-institution-admin.module'
+      ).then((m) => m.RegisterInstitutionAdminPageModule),
+  },
+  {
+    path: 'register-institution-staff',
+    loadChildren: () =>
+      import(
+        './pages/register-institution-staff/register-institution-staff.module'
+      ).then((m) => m.RegisterInstitutionStaffPageModule),
+  },
+  {
     path: 'challenge',
     loadChildren: () =>
       import('./pages/challenge/challenge.module').then(
@@ -131,7 +159,11 @@ const routes: Routes = [
         (m) => m.AddCouponPageModule
       ),
     canActivate: [AuthGuard],
+  },  {
+    path: 'add-family',
+    loadChildren: () => import('./pages/add-family/add-family.module').then( m => m.AddFamilyPageModule)
   },
+
 ];
 @NgModule({
   imports: [

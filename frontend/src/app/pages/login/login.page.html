@@ -1,13 +1,11 @@
 <ion-header>
-   <ion-button fill="clear" class="back-button" (click)="goBack()">
-      <ion-icon name="chevron-back-outline"></ion-icon>
-    </ion-button>
+  <ion-button fill="clear" class="back-button" (click)="goBack()">
+    <ion-icon name="chevron-back-outline"></ion-icon>
+  </ion-button>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div class="container">
-  
-
     <div class="title">
       <h2>Vamos nessa?</h2>
       <h2 class="subtitle">Um dia leve te espera.</h2>
@@ -40,16 +38,19 @@
         ></ion-icon>
       </ion-input>
 
-     
-
-      <ion-button expand="block" class="login-button" type="submit" (click)="login()">
+      <ion-button
+        expand="block"
+        class="login-button"
+        type="submit"
+        (click)="login()"
+      >
         Entrar
       </ion-button>
     </form>
 
     <div class="signup">
       Não possui conta?
-      <a (click)="goToSignUp()">Cadastre-se</a>
+      <a (click)="goToSignUp()">Cadastre-se aqui</a>
     </div>
   </div>
 </ion-content>

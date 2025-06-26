@@ -16,15 +16,25 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    const token = this.authService.getToken();
+    // Lista de URLs que NÃO devem receber o token de autorização
+    const externalUrls = ['cloudinary.com', 'api.cloudinary.com'];
 
-    if (token) {
-      // O AuthService já retorna o token com "Bearer " prefixo
-      request = request.clone({
-        setHeaders: {
-          Authorization: token,
-        },
-      });
+    // Verifica se a URL é externa e não deve receber token
+    const shouldSkipAuth = externalUrls.some((url) =>
+      request.url.includes(url)
+    );
+
+    if (!shouldSkipAuth) {
+      const token = this.authService.getToken();
+
+      if (token) {
+        // O AuthService já retorna o token com "Bearer " prefixo
+        request = request.clone({
+          setHeaders: {
+            Authorization: token,
+          },
+        });
+      }
     }
 
     return next.handle(request);
