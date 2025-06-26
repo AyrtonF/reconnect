@@ -451,24 +451,6 @@ npx webpack-bundle-analyzer dist/stats.json
 - Componentes reutilizáveis
 - Responsive design
 
-## 📄 Licença
-
-Este projeto está sob licença [MIT](LICENSE).
-
-## 👥 Equipe
-
-- **Desenvolvimento Backend**: Spring Boot + PostgreSQL
-- **Desenvolvimento Frontend**: Angular + Ionic
-- **UI/UX Design**: Interface mobile-first
-- **DevOps**: Docker + Render.com
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-- 📧 Email: suporte@reconnect.app
-- 🐛 Issues: [GitHub Issues](link-para-issues)
-- 📖 Documentação: [Wiki do Projeto](link-para-wiki)
-
 ## 📊 Diagramas
 
 [![Diagrama de classes](https://img.shields.io/badge/Diagrama%20de%20classes-blue?style=for-the-badge)](https://github.com/andrefilipe1310/reconnect/tree/main/docs/diagrams/class_diagram.md)
