@@ -64,51 +64,88 @@
     </div>
 
     <!-- Cursos em andamento -->
-    <h3 class="section-title">Cursos em Andamento</h3>
+    <div class="courses-section">
+      <h3 class="section-title">Cursos em Andamento</h3>
 
-    <ng-container *ngIf="inProgressCourses.length > 0">
-      <ion-card class="course-card" *ngFor="let course of inProgressCourses">
-        <img [src]="course.thumbnail" [alt]="course.title" />
-        <ion-card-header>
-          <ion-card-title class="orange-text">
-            {{ course.title }}
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <p class="description">{{ course.description }}</p>
-
-          <div class="progress-section">
-            <div class="progress-text">
-              <span
-                >Progresso: {{ course.progress.percentageCompleted || 0
-                }}%</span
+      <ng-container *ngIf="inProgressCourses.length > 0">
+        <ion-card
+          class="course-card"
+          *ngFor="let course of inProgressCourses"
+          (click)="accessCourse(course)"
+        >
+          <div class="course-image-container">
+            <img
+              [src]="course.thumbnail || 'assets/images/default-course.png'"
+              [alt]="course.title"
+              class="course-image"
+            />
+            <div class="course-progress-overlay">
+              <span class="progress-percentage"
+                >{{ (course.progress && course.progress.percentageCompleted) ||
+                0 }}%</span
               >
-              <span>{{ course.score.current || 0 }} pts</span>
             </div>
-            <ion-progress-bar
-              [value]="(course.progress.percentageCompleted || 0) / 100"
-              color="warning"
-            >
-            </ion-progress-bar>
           </div>
 
-          <ion-button
-            expand="block"
-            color="warning"
-            class="access-button"
-            (click)="accessCourse(course)"
-          >
-            ACESSAR CURSO
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
-    </ng-container>
+          <ion-card-header>
+            <ion-card-title class="course-title">
+              {{ course.title }}
+            </ion-card-title>
+          </ion-card-header>
 
-    <div *ngIf="inProgressCourses.length === 0" class="no-courses">
-      <p>Você ainda não tem cursos em andamento.</p>
-      <ion-button color="primary" (click)="navigateToPage('courses')">
-        Explorar cursos
-      </ion-button>
+          <ion-card-content>
+            <p class="course-description">{{ course.description }}</p>
+
+            <div class="progress-section">
+              <div class="progress-info">
+                <span class="progress-text"
+                  >Progresso: {{ (course.progress &&
+                  course.progress.percentageCompleted) || 0 }}%</span
+                >
+                <span class="points-text"
+                  >{{ (course.score && course.score.current) || 0 }} pts</span
+                >
+              </div>
+              <ion-progress-bar
+                [value]="((course.progress && course.progress.percentageCompleted) || 0) / 100"
+                color="tertiary"
+                class="course-progress-bar"
+              ></ion-progress-bar>
+            </div>
+
+            <ion-button
+              expand="block"
+              fill="solid"
+              color="primary"
+              class="access-button"
+              (click)="accessCourse(course); $event.stopPropagation()"
+            >
+              <ion-icon name="play-outline" slot="start"></ion-icon>
+              CONTINUAR CURSO
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </ng-container>
+
+      <div *ngIf="inProgressCourses.length === 0" class="no-courses">
+        <div class="no-courses-icon">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
+        <h4>Nenhum curso em andamento</h4>
+        <p>
+          Explore nossa biblioteca de cursos e comece sua jornada de
+          aprendizado!
+        </p>
+        <ion-button
+          color="primary"
+          fill="solid"
+          (click)="navigateToPage('courses')"
+          class="explore-button"
+        >
+          <ion-icon name="search-outline" slot="start"></ion-icon>
+          Explorar Cursos
+        </ion-button>
+      </div>
     </div>
   </div>
 </ion-content>

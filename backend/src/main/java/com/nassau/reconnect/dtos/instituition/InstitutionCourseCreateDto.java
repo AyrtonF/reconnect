@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,6 +22,9 @@ public class InstitutionCourseCreateDto {
 
     private String description;
     private String image;
+    private List<InstitutionMaterialDto> materials;
+    private List<InstitutionVideoDto> videos;
+    private List<InstitutionQuestionDto> questions;
 
     private InstitutionCourseDto.Settings settings;
 }

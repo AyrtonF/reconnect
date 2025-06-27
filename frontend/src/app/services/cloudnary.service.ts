@@ -81,6 +81,71 @@ export class CloudinaryService {
     }
   }
 
+  async uploadVideo(file: File): Promise<string> {
+    // Validações básicas
+    if (!file) {
+      throw new Error('Nenhum arquivo fornecido');
+    }
+
+    // Verificar se é um vídeo
+    if (!file.type.startsWith('video/')) {
+      throw new Error('O arquivo deve ser um vídeo');
+    }
+
+    // Verificar tamanho (aumentado para vídeos - 100MB)
+    const maxVideoSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxVideoSize) {
+      throw new Error('O vídeo é muito grande. Tamanho máximo: 100MB');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/video/upload`;
+
+    try {
+      console.log('Enviando vídeo para Cloudinary:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        cloudName: CLOUDINARY_CONFIG.cloudName,
+        uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+        url: url,
+      });
+
+      const response = await lastValueFrom(this.http.post<any>(url, formData));
+
+      console.log('Resposta do Cloudinary para vídeo:', response);
+
+      if (response?.secure_url) {
+        return response.secure_url;
+      } else {
+        console.error('Resposta inesperada do Cloudinary:', response);
+        throw new Error('Resposta inválida do Cloudinary');
+      }
+    } catch (error: any) {
+      console.error('Erro detalhado ao enviar vídeo:', error);
+
+      // Melhor tratamento de erros
+      if (error.error?.error?.message) {
+        throw new Error(`Erro do Cloudinary: ${error.error.error.message}`);
+      } else if (error.status === 0) {
+        throw new Error('Erro de conexão. Verifique sua internet.');
+      } else if (error.status === 400) {
+        throw new Error(
+          'Dados inválidos. Verifique se o upload preset está correto.'
+        );
+      } else if (error.status === 401) {
+        throw new Error(
+          'Não autorizado. Verifique as configurações do Cloudinary.'
+        );
+      } else {
+        throw new Error('Erro ao enviar vídeo. Tente novamente.');
+      }
+    }
+  }
+
   // Método auxiliar para validar configurações
   validateConfig(): boolean {
     return validateCloudinaryConfig();

@@ -210,6 +210,16 @@ export class ChallengeDetailsPage implements OnInit {
   }
 
   async submitChallengeCompletion() {
+    console.log(
+      'ChallengeDetailsPage.submitChallengeCompletion - Iniciando submissão:',
+      {
+        currentUserId: this.currentUserId,
+        userFamily: this.userFamily,
+        challenge: this.challenge,
+        challengeActivityImage: this.challengeActivityImage,
+      }
+    );
+
     const loading = await this.loadingController.create({
       message: 'Enviando conclusão do desafio...',
     });
@@ -230,7 +240,16 @@ export class ChallengeDetailsPage implements OnInit {
         timestamp: new Date().toISOString(),
       };
 
-      await this.postService.addPost(newPost).toPromise();
+      console.log(
+        'ChallengeDetailsPage.submitChallengeCompletion - Dados do post:',
+        newPost
+      );
+
+      const result = await this.postService.addPost(newPost).toPromise();
+      console.log(
+        'ChallengeDetailsPage.submitChallengeCompletion - Post criado com sucesso:',
+        result
+      );
 
       await loading.dismiss();
       await this.showToast(
@@ -242,7 +261,15 @@ export class ChallengeDetailsPage implements OnInit {
       this.navCtrl.navigateForward('/family-details');
     } catch (error) {
       await loading.dismiss();
-      console.error('Erro ao concluir desafio:', error);
+      console.error(
+        'ChallengeDetailsPage.submitChallengeCompletion - Erro ao concluir desafio:',
+        {
+          error,
+          errorMessage:
+            error instanceof Error ? error.message : 'Erro desconhecido',
+          stack: error instanceof Error ? error.stack : undefined,
+        }
+      );
       await this.showAlert(
         'Erro',
         'Não foi possível enviar a conclusão do desafio.'

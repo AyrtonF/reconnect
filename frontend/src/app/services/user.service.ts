@@ -377,4 +377,44 @@ export class UserService {
       })
     );
   }
+
+  // Adicionar pontos ao usuário
+  addPointsToUser(
+    userId: number,
+    points: number
+  ): Observable<User | undefined> {
+    const headers = this.getAuthHeaders();
+
+    return this.http
+      .patch<ApiResponse<UserDto>>(
+        `${this.apiUrl}/${userId}/add-points`,
+        { points },
+        { headers }
+      )
+      .pipe(
+        map((response) => {
+          if (response.success && response.data) {
+            return this.mapDtoToUser(response.data);
+          } else {
+            throw new Error(response.error || 'Failed to add points to user');
+          }
+        }),
+        catchError((error) => {
+          console.error('Erro ao adicionar pontos ao usuário:', error);
+          let errorMessage = 'Erro ao adicionar pontos ao usuário';
+
+          if (error.status === 400) {
+            errorMessage = 'Dados inválidos para adição de pontos';
+          } else if (error.status === 401) {
+            errorMessage = 'Acesso não autorizado';
+          } else if (error.status === 404) {
+            errorMessage = 'Usuário não encontrado';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
 }

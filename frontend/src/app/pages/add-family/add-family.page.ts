@@ -52,9 +52,14 @@ export class AddFamilyPage implements OnInit {
     this.isLoading = true;
 
     try {
+      const currentUserId = this.authService.getUserId();
+      if (!currentUserId) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const familyToCreate: Omit<Family, 'id'> = {
         name: this.familyData.name.trim(),
-        membersIds: [], // Array vazio inicialmente
+        membersIds: [currentUserId], // Adicionar o usuário criador automaticamente
         postsIds: [], // Array vazio inicialmente
         challengesIds: [], // Array vazio inicialmente
       };
@@ -62,8 +67,24 @@ export class AddFamilyPage implements OnInit {
       const newFamily = await this.familyService
         .addFamily(familyToCreate)
         .toPromise();
-      await this.showToast('Família criada com sucesso!', 'success');
-      this.navCtrl.navigateBack('/home');
+
+      // Tentar adicionar o usuário à família criada (fallback se o backend não fez automaticamente)
+      try {
+        await this.familyService
+          .joinFamilyCurrentUser(newFamily!.id)
+          .toPromise();
+      } catch (joinError) {
+        console.log(
+          'Usuário já foi adicionado automaticamente à família ou erro menor:',
+          joinError
+        );
+      }
+
+      await this.showToast(
+        'Família criada com sucesso! Você já faz parte dela.',
+        'success'
+      );
+      this.navCtrl.navigateRoot('/family-details');
     } catch (error) {
       console.error('Erro ao criar família:', error);
       await this.showAlert(
@@ -126,7 +147,7 @@ export class AddFamilyPage implements OnInit {
       await this.familyService.joinFamilyCurrentUser(familyId).toPromise();
       await loading.dismiss();
       await this.showToast('Você agora faz parte da família!', 'success');
-      this.navCtrl.navigateBack('/home');
+      this.navCtrl.navigateRoot('/family-details');
     } catch (error) {
       await loading.dismiss();
       console.error('Erro ao participar da família:', error);

@@ -15,7 +15,12 @@ import { AuthService } from '../../services/auth.service';
 export class ChallengePage implements OnInit {
   userPoints: number = 0;
   challenges: Challenge[] = [];
-  loggedInUserId: number = 1; // Será atualizado com o usuário real
+  dailyChallenges: Challenge[] = [];
+  ongoingChallenges: Challenge[] = [];
+  completedChallenges: Challenge[] = [];
+  loggedInUserId: number = 0;
+  loadingChallenges = true;
+  selectedTodayChallenge: Challenge | null = null;
 
   constructor(
     private challengeService: ChallengeService,
@@ -25,82 +30,194 @@ export class ChallengePage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadChallenges();
+    this.loggedInUserId = this.authService.getUserId() || 0;
     this.loadUserPoints();
+    this.loadChallenges();
   }
 
   loadChallenges() {
-    this.challengeService.getAllChallenges().subscribe((challenges) => {
-      this.challenges = challenges.map((challenge) => ({
-        ...challenge,
-        buttonText: this.getButtonText(challenge),
-        status: this.getChallengeStatus(challenge),
-      }));
+    this.loadingChallenges = true;
+    this.challengeService.getAllChallenges().subscribe({
+      next: (challenges) => {
+        this.challenges = challenges;
+        this.organizeChallenges();
+        this.loadingChallenges = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar desafios:', error);
+        this.loadingChallenges = false;
+      },
     });
+  }
+
+  organizeChallenges() {
+    // Separar desafios em categorias
+    this.ongoingChallenges = this.challenges.filter((challenge) =>
+      this.isChallengeInProgress(challenge)
+    );
+
+    this.completedChallenges = this.challenges.filter((challenge) =>
+      this.isChallengeCompleted(challenge)
+    );
+
+    // Selecionar 3 desafios aleatórios para o dia (que não estão em andamento ou completos)
+    const availableChallenges = this.challenges.filter(
+      (challenge) =>
+        !this.isChallengeInProgress(challenge) &&
+        !this.isChallengeCompleted(challenge)
+    );
+
+    this.dailyChallenges = this.getRandomChallenges(availableChallenges, 3);
+  }
+
+  getRandomChallenges(challenges: Challenge[], count: number): Challenge[] {
+    const shuffled = [...challenges].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
   }
 
   loadUserPoints() {
-    this.userService.getUserById(this.loggedInUserId).subscribe((user) => {
-      this.userPoints = user?.score || 0;
-    });
-  }
-
-  getButtonText(challenge: Challenge): string {
-    // Lógica para determinar o texto do botão com base no status e participação
-    if (challenge.participantsIds?.includes(this.loggedInUserId)) {
-      return 'Concluído'; // Ou 'Ver Detalhes', dependendo da sua lógica
-    } else if (challenge.status === 'pending') {
-      return 'Participar';
-    } else if (challenge.status === 'completed') {
-      return 'Ver Detalhes';
-    } else {
-      return 'Ver Mais';
+    if (this.loggedInUserId) {
+      // Usar o método do AuthService que tem melhor tratamento de erro
+      this.authService.getCurrentUser().subscribe({
+        next: (user) => {
+          this.userPoints = user?.score || 0;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar pontos do usuário:', error);
+          // Fallback para um valor padrão
+          this.userPoints = 0;
+        },
+      });
     }
   }
 
-  getChallengeStatus(challenge: Challenge): string {
-    // Lógica para determinar o status visual do desafio
-    if (challenge.participantsIds?.includes(this.loggedInUserId)) {
-      return 'completed';
-    } else if (challenge.status === 'pending') {
-      return 'participate';
+  // Verificações de status dos desafios
+  isChallengeCompleted(challenge: Challenge): boolean {
+    // Verificar se o usuário já completou este desafio
+    return !!(
+      challenge.participantsIds?.includes(this.loggedInUserId) &&
+      challenge.status === 'completed'
+    );
+  }
+
+  isChallengeInProgress(challenge: Challenge): boolean {
+    // Verificar se o usuário está participando do desafio
+    return !!(
+      challenge.participantsIds?.includes(this.loggedInUserId) &&
+      challenge.status !== 'completed'
+    );
+  }
+
+  isChallengeDisabled(challenge: Challenge): boolean {
+    // Desabilitar se já foi selecionado outro desafio hoje
+    if (
+      this.selectedTodayChallenge &&
+      this.selectedTodayChallenge.id !== challenge.id
+    ) {
+      return true;
+    }
+    return this.isChallengeCompleted(challenge);
+  }
+
+  // Métodos para definir aparência dos cards
+  getChallengeStatusClass(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'status-completed';
+    if (this.isChallengeInProgress(challenge)) return 'status-in-progress';
+    return 'status-available';
+  }
+
+  getChallengeStatusIcon(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'checkmark-circle';
+    if (this.isChallengeInProgress(challenge)) return 'time';
+    return 'star-outline';
+  }
+
+  getChallengeButtonFill(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'outline';
+    if (this.isChallengeInProgress(challenge)) return 'outline';
+    return 'solid';
+  }
+
+  getChallengeButtonColor(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'success';
+    if (this.isChallengeInProgress(challenge)) return 'warning';
+    return 'primary';
+  }
+
+  getChallengeButtonIcon(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'checkmark-outline';
+    if (this.isChallengeInProgress(challenge)) return 'eye-outline';
+    return 'play-outline';
+  }
+
+  getChallengeButtonText(challenge: Challenge): string {
+    if (this.isChallengeCompleted(challenge)) return 'Concluído';
+    if (this.isChallengeInProgress(challenge)) return 'Ver mais';
+    return 'Participar';
+  }
+
+  // Ações dos desafios
+  handleChallengeClick(challenge: Challenge) {
+    this.goToChallengeDetails(challenge.id);
+  }
+
+  handleChallengeAction(challenge: Challenge, event: Event) {
+    event.stopPropagation();
+
+    if (this.isChallengeCompleted(challenge)) {
+      this.goToChallengeDetails(challenge.id);
+    } else if (this.isChallengeInProgress(challenge)) {
+      this.goToChallengeDetails(challenge.id);
     } else {
-      return 'see-more';
+      this.participateChallenge(challenge.id);
     }
   }
 
   participateChallenge(challengeId: number) {
-    // Lógica para participar do desafio usando a API
     this.challengeService
       .participateInChallenge(challengeId, this.loggedInUserId)
-      .subscribe(
-        (success) => {
+      .subscribe({
+        next: (success) => {
           if (success) {
-            this.loadChallenges(); // Recarrega a lista de desafios após participar
+            // Marcar como desafio selecionado do dia
+            this.selectedTodayChallenge =
+              this.dailyChallenges.find((c) => c.id === challengeId) || null;
+            this.loadChallenges(); // Recarregar para atualizar status
+            this.goToChallengeDetails(challengeId);
           }
         },
-        (error) => {
+        error: (error) => {
           console.error('Erro ao participar do desafio:', error);
-        }
-      );
+        },
+      });
+  }
+
+  goToChallengeDetails(challengeId: number) {
+    this.navCtrl.navigateForward(`/challenge-details/${challengeId}`);
+  }
+
+  goChallengeDetails(challengeId: number) {
+    this.goToChallengeDetails(challengeId);
   }
 
   seeMoreChallenge(challengeId: number) {
-    // Lógica para navegar para a página de detalhes do desafio
-    console.log(`Ver mais detalhes do desafio ${challengeId}`);
-    // Você pode usar o NavController aqui para navegar
+    this.goToChallengeDetails(challengeId);
   }
 
   goHome() {
     this.navCtrl.navigateRoot('/home');
   }
-  goChallengeDetails(challengeId: number) {
-    // Lógica para navegar para a página de detalhes do desafio
-    this.navCtrl.navigateForward(`/challenge-details/${challengeId}`);
+
+  // Métodos legacy para compatibilidade
+  getButtonText(challenge: Challenge): string {
+    return this.getChallengeButtonText(challenge);
+  }
+
+  getChallengeStatus(challenge: Challenge): string {
+    return this.getChallengeStatusClass(challenge);
   }
 
   getChallengeImage(challenge: Challenge): string {
-    // Lógica para obter a imagem do desafio
-    return challenge.image || '../../../assets/images/default-challenge.png'; // Imagem padrão
+    return challenge.image || 'assets/images/default-course.png'; // Usar imagem existente como fallback
   }
 }

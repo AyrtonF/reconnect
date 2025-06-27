@@ -1,7 +1,5 @@
 package com.nassau.reconnect.models;
 
-
-
 import com.nassau.reconnect.models.enums.CourseStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,13 +36,13 @@ public class InstitutionCourse {
 
     private String image;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InstitutionMaterial> materials = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InstitutionVideo> videos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InstitutionQuestion> questions = new ArrayList<>();
 
     @CreationTimestamp
@@ -58,11 +56,7 @@ public class InstitutionCourse {
     private CourseStatus status;
 
     @ManyToMany
-    @JoinTable(
-            name = "institution_course_enrollments",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
+    @JoinTable(name = "institution_course_enrollments", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
     private Set<User> studentsEnrolled = new HashSet<>();
 
     @Embedded
@@ -76,5 +70,36 @@ public class InstitutionCourse {
         private boolean allowEnrollment;
         private boolean requireApproval;
         private Integer maxStudents;
+    }
+
+    // Helper methods for maintaining bidirectional relationships
+    public void addMaterial(InstitutionMaterial material) {
+        materials.add(material);
+        material.setCourse(this);
+    }
+
+    public void removeMaterial(InstitutionMaterial material) {
+        materials.remove(material);
+        material.setCourse(null);
+    }
+
+    public void addVideo(InstitutionVideo video) {
+        videos.add(video);
+        video.setCourse(this);
+    }
+
+    public void removeVideo(InstitutionVideo video) {
+        videos.remove(video);
+        video.setCourse(null);
+    }
+
+    public void addQuestion(InstitutionQuestion question) {
+        questions.add(question);
+        question.setCourse(this);
+    }
+
+    public void removeQuestion(InstitutionQuestion question) {
+        questions.remove(question);
+        question.setCourse(null);
     }
 }

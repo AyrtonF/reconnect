@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiResponse, InstitutionCourse } from '../models/types';
 import { environment } from '../../environments/environment';
 import { ErrorHandlerService } from './error-handler.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,8 +15,21 @@ export class CourseInstitutionService {
 
   constructor(
     private http: HttpClient,
-    private errorHandler: ErrorHandlerService
+    private errorHandler: ErrorHandlerService,
+    private authService: AuthService
   ) {}
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    console.log(
+      'CourseInstitutionService.getAuthHeaders - Token disponível:',
+      !!token
+    );
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+  }
 
   // Obter todos os cursos
   getCourses(): Observable<InstitutionCourse[]> {
@@ -77,9 +91,7 @@ export class CourseInstitutionService {
   }
 
   // Criar novo curso
-  createCourse(
-    courseData: Partial<InstitutionCourse>
-  ): Observable<ApiResponse<InstitutionCourse>> {
+  createCourse(courseData: any): Observable<ApiResponse<InstitutionCourse>> {
     return this.http
       .post<ApiResponse<InstitutionCourse>>(`${this.apiUrl}`, courseData)
       .pipe(catchError(this.errorHandler.handleError));
@@ -156,15 +168,44 @@ export class CourseInstitutionService {
 
   // Matricular usuário em curso institucional
   enrollUserInCourse(courseId: number, userId: number): Observable<boolean> {
-    return this.http
-      .post<ApiResponse<boolean>>(
-        `${this.apiUrl}/${courseId}/enroll/${userId}`,
-        {}
-      )
-      .pipe(
-        map((response) => response.data || false),
-        catchError(this.errorHandler.handleError)
-      );
+    const url = `${this.apiUrl}/${courseId}/enroll/${userId}`;
+    const headers = this.getAuthHeaders();
+
+    console.log(
+      'CourseInstitutionService.enrollUserInCourse - Iniciando matrícula:',
+      {
+        courseId,
+        userId,
+        url,
+        apiUrl: this.apiUrl,
+        hasToken: !!this.authService.getToken(),
+      }
+    );
+
+    return this.http.post<ApiResponse<boolean>>(url, {}, { headers }).pipe(
+      map((response) => {
+        console.log(
+          'CourseInstitutionService.enrollUserInCourse - Resposta recebida:',
+          response
+        );
+        return response.data || false;
+      }),
+      catchError((error) => {
+        console.error(
+          'CourseInstitutionService.enrollUserInCourse - Erro na matrícula:',
+          {
+            error,
+            status: error.status,
+            statusText: error.statusText,
+            errorBody: error.error,
+            url: error.url,
+            courseId,
+            userId,
+          }
+        );
+        return this.errorHandler.handleError(error);
+      })
+    );
   }
 
   // Verificar se usuário está matriculado em curso institucional

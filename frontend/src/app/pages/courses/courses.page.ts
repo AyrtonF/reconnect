@@ -45,41 +45,154 @@ export class CoursesPage implements OnInit {
   // Método para inscrever-se em um curso
   enrollInCourse(course: Course) {
     const isInstitutionalCourse = course.isInstitutional || false;
+    const userId = this.authService.getUserId();
+
+    console.log(
+      'CoursesPage.enrollInCourse - Iniciando processo de matrícula:',
+      {
+        courseId: course.id,
+        userId,
+        courseTitle: course.title,
+        isInstitutional: isInstitutionalCourse,
+        hasToken: !!this.authService.getToken(),
+      }
+    );
+
+    if (!userId) {
+      console.error('CoursesPage.enrollInCourse - Usuário não autenticado');
+      this.showErrorMessage('Usuário não autenticado. Faça login novamente.');
+      return;
+    }
 
     if (isInstitutionalCourse) {
       // Para cursos institucionais
-      console.log('Matriculando em curso institucional:', course.id);
+      console.log(
+        'CoursesPage.enrollInCourse - Delegando para curso institucional:',
+        course.id
+      );
       this.enrollInInstitutionalCourse(course.id, course);
     } else {
-      // Para cursos regulares
-      console.log('Matriculando em curso regular:', course.id);
-      this.courseService.enrollInCourseCurrentUser(course.id).subscribe({
-        next: (enrolled) => {
-          if (enrolled) {
-            // Matrícula bem-sucedida, navegar para detalhes
-            this.showSuccessMessage('Matriculado com sucesso no curso!');
-            this.goToCourseDetails(course);
-            // Recarregar lista para atualizar status
-            this.loadCourses();
-          } else {
-            this.showErrorMessage('Não foi possível realizar a matrícula.');
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao matricular no curso regular:', error);
+      // Para cursos regulares - ir direto para matrícula sem verificação prévia
+      console.log(
+        'CoursesPage.enrollInCourse - Tentando matrícula em curso regular sem verificação prévia:',
+        course.id
+      );
+
+      // TEMPORÁRIO: Removendo verificação prévia por problemas de endpoint no backend
+      // TODO: Quando o backend implementar os endpoints de verificação, reativar
+      this.performRegularEnrollment(course);
+    }
+  }
+
+  // Método auxiliar para realizar matrícula em curso regular
+  private performRegularEnrollment(course: Course) {
+    console.log(
+      'CoursesPage.performRegularEnrollment - Matriculando em curso regular:',
+      course.id
+    );
+
+    this.courseService.enrollInCourseCurrentUser(course.id).subscribe({
+      next: (enrolled) => {
+        console.log(
+          'CoursesPage.performRegularEnrollment - Resultado da matrícula:',
+          { enrolled, courseId: course.id }
+        );
+
+        if (enrolled) {
+          // Matrícula bem-sucedida, navegar para detalhes
+          this.showSuccessMessage('Matriculado com sucesso no curso!');
+          this.goToCourseDetails(course);
+          // Recarregar lista para atualizar status
+          this.loadCourses();
+        } else {
+          this.showErrorMessage('Não foi possível realizar a matrícula.');
+        }
+      },
+      error: (error) => {
+        console.error(
+          'CoursesPage.performRegularEnrollment - Erro na matrícula:',
+          { error, courseId: course.id, status: error.status }
+        );
+
+        // Capturar mensagem de erro de múltiplas fontes possíveis
+        const errorMessage =
+          error.error?.message ||
+          error.error ||
+          error.message ||
+          (typeof error === 'string' ? error : '') ||
+          '';
+
+        console.log('CoursesPage.performRegularEnrollment - Analisando erro:', {
+          errorMessage,
+          fullError: error.error,
+          errorType: typeof error,
+          errorKeys: Object.keys(error || {}),
+          originalError: error,
+          status: error.status,
+        });
+
+        // Verificar se a mensagem indica que o usuário já está matriculado
+        // Independente do status, se a mensagem indica matrícula já existente, tratar como sucesso
+        if (
+          errorMessage.toLowerCase().includes('já matriculado') ||
+          errorMessage.toLowerCase().includes('already enrolled') ||
+          errorMessage.toLowerCase().includes('duplicate') ||
+          errorMessage
+            .toLowerCase()
+            .includes('student may already be enrolled') ||
+          errorMessage.toLowerCase().includes('may already be enrolled')
+        ) {
+          console.log(
+            'CoursesPage.performRegularEnrollment - Erro indica usuário já matriculado'
+          );
+          this.showSuccessMessage(
+            'Você já está matriculado neste curso! Redirecionando...'
+          );
+          this.goToCourseDetails(course);
+          return;
+        }
+
+        // Outros tipos de erro baseados no status (se disponível)
+        if (error.status === 401) {
+          this.showErrorMessage('Sessão expirada. Faça login novamente.');
+        } else if (error.status === 400) {
+          // Erro 400 que não é matrícula já existente
+          this.showErrorMessage(
+            'Não foi possível realizar a matrícula. Verifique se você tem permissão para este curso.'
+          );
+        } else {
           this.showErrorMessage(
             'Erro ao se matricular no curso. Tente novamente.'
           );
-        },
-      });
-    }
+        }
+      },
+    });
   }
 
   // Método para navegar para detalhes do curso
   goToCourseDetails(course: Course) {
     const type = course.isInstitutional ? 'institutional' : 'regular';
-    this.navCtrl.navigateForward(`/course-details/${course.id}`, {
-      queryParams: { type },
+    const courseId = course.id;
+
+    console.log(
+      'CoursesPage.goToCourseDetails - Navegando para detalhes do curso:',
+      {
+        courseId,
+        courseTitle: course.title,
+        isInstitutional: course.isInstitutional,
+        type,
+        navigationUrl: `/course-details/${courseId}`,
+        queryParams: { type },
+      }
+    );
+
+    this.navCtrl.navigateForward(`/course-details/${courseId}`, {
+      queryParams: {
+        type,
+        // Adicionar informações extras para debug
+        courseTitle: course.title,
+        isInstitutional: course.isInstitutional,
+      },
     });
   }
 
@@ -95,52 +208,134 @@ export class CoursesPage implements OnInit {
   // Método para matricular em cursos institucionais
   private enrollInInstitutionalCourse(courseId: number, course: Course) {
     const userId = this.authService.getUserId();
-    console.log(userId);
+    console.log(
+      'CoursesPage.enrollInInstitutionalCourse - Iniciando processo de matrícula:',
+      {
+        courseId,
+        userId,
+        course: course.title,
+        hasToken: !!this.authService.getToken(),
+      }
+    );
+
     if (!userId) {
+      console.error(
+        'CoursesPage.enrollInInstitutionalCourse - Usuário não autenticado'
+      );
       this.showErrorMessage('Usuário não autenticado. Faça login novamente.');
       return;
     }
 
+    // TEMPORÁRIO: Ir direto para matrícula sem verificação prévia
+    // TODO: Quando o backend implementar o endpoint GET /{courseId}/enrollment/{userId},
+    // reativar a verificação prévia
     console.log(
-      'Matriculando em curso institucional:',
-      courseId,
-      'para usuário:',
-      userId
+      'CoursesPage.enrollInInstitutionalCourse - Tentando matrícula diretamente (sem verificação prévia)',
+      { courseId, userId }
     );
 
-    // Usar o serviço de cursos institucionais com o ID real
+    this.performEnrollment(courseId, userId, course);
+  }
+
+  // Método auxiliar para realizar a matrícula
+  private performEnrollment(courseId: number, userId: number, course: Course) {
+    console.log('CoursesPage.performEnrollment - Realizando matrícula:', {
+      courseId,
+      userId,
+      courseTitle: course.title,
+    });
+
     this.courseInstitutionService
       .enrollUserInCourse(courseId, userId)
       .subscribe({
         next: (enrolled) => {
+          console.log(
+            'CoursesPage.performEnrollment - Resultado da matrícula:',
+            enrolled
+          );
           if (enrolled) {
             // Matrícula bem-sucedida
             this.showSuccessMessage('Matriculado com sucesso no curso!');
 
             // Navegar para o curso usando o método padronizado
-            console.log('OLHA O ID AQUI' + courseId);
+            console.log(
+              'CoursesPage.performEnrollment - Navegando para curso ID:',
+              courseId
+            );
             this.goToCourseDetails(course);
 
             // Recarregar lista para atualizar status
             this.loadCourses();
           } else {
+            console.warn(
+              'CoursesPage.performEnrollment - Matrícula retornou false'
+            );
             this.showErrorMessage('Não foi possível realizar a matrícula.');
           }
         },
         error: (error) => {
-          console.error('Erro ao matricular em curso institucional:', error);
+          console.error('CoursesPage.performEnrollment - Erro na matrícula:', {
+            error,
+            status: error.status,
+            statusText: error.statusText,
+            errorBody: error.error,
+            courseId,
+            userId,
+          });
 
-          if (error.status === 400) {
-            this.showErrorMessage(
-              'Dados da matrícula inválidos. Verifique se você tem permissão para este curso.'
+          // Capturar mensagem de erro de múltiplas fontes possíveis
+          const errorMessage =
+            error.error?.message ||
+            error.error ||
+            error.message ||
+            (typeof error === 'string' ? error : '') ||
+            '';
+
+          console.log('CoursesPage.performEnrollment - Analisando erro:', {
+            errorMessage,
+            fullError: error.error,
+            errorType: typeof error,
+            errorKeys: Object.keys(error || {}),
+            originalError: error,
+            status: error.status,
+          });
+
+          // Verificar se a mensagem indica que o usuário já está matriculado
+          // Independente do status, se a mensagem indica matrícula já existente, tratar como sucesso
+          if (
+            errorMessage.toLowerCase().includes('já matriculado') ||
+            errorMessage.toLowerCase().includes('already enrolled') ||
+            errorMessage.toLowerCase().includes('duplicate') ||
+            errorMessage
+              .toLowerCase()
+              .includes('student may already be enrolled') ||
+            errorMessage.toLowerCase().includes('may already be enrolled')
+          ) {
+            console.log(
+              'CoursesPage.performEnrollment - Erro indica usuário já matriculado'
             );
-          } else if (error.status === 404) {
+            this.showSuccessMessage(
+              'Você já está matriculado neste curso! Redirecionando...'
+            );
+            this.goToCourseDetails(course);
+            return;
+          }
+
+          // Outros tipos de erro baseados no status (se disponível)
+          if (error.status === 404) {
             this.showErrorMessage(
               'Curso não encontrado. Verifique se o curso existe.'
             );
           } else if (error.status === 403) {
             this.showErrorMessage(
               'Você não tem permissão para se matricular neste curso.'
+            );
+          } else if (error.status === 401) {
+            this.showErrorMessage('Sessão expirada. Faça login novamente.');
+          } else if (error.status === 400) {
+            // Erro 400 que não é matrícula já existente
+            this.showErrorMessage(
+              'Não foi possível realizar a matrícula. Verifique se você tem permissão para este curso.'
             );
           } else {
             this.showErrorMessage(

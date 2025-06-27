@@ -1,0 +1,99 @@
+.edit-course-page {
+  --background: var(--soft-background);
+
+  .container {
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .course-tabs {
+    margin-bottom: 20px;
+    --color: var(--primary-green);
+    --color-checked: var(--accent-orange);
+    --border-color: var(--primary-green);
+  }
+
+  .tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  ion-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+  }
+
+  ion-card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--primary-green);
+    font-weight: 600;
+  }
+
+  ion-item {
+    margin-bottom: 16px;
+    --border-radius: 12px;
+    --background: var(--soft-background);
+  }
+
+  ion-label {
+    color: var(--primary-green);
+    font-weight: 500;
+  }
+
+  .video-item,
+  .material-item,
+  .quiz-item {
+    border: 1px solid var(--light-gray);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: white;
+  }
+
+  .save-button-container {
+    position: sticky;
+    bottom: 16px;
+    padding: 16px;
+    background: var(--soft-background);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+
+    ion-button {
+      --border-radius: 16px;
+      height: 48px;
+      font-weight: 600;
+      --background: var(--accent-orange);
+    }
+  }
+
+  .question-item {
+    background: var(--soft-background);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 12px;
+    }
+
+    .save-button-container {
+      margin: 0 -12px -12px -12px;
+    }
+  }
+}

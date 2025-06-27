@@ -14,33 +14,136 @@
   </ion-toolbar>
 </ion-header>
 
-
-
 <ion-content class="challenge-page">
   <div class="container">
-    <p class="points">{{ userPoints }} Pontos</p>
+    <!-- Informações do usuário -->
+    <div class="user-info">
+      <div class="points-display">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <span class="points-text">{{ userPoints }} Pontos</span>
+      </div>
+    </div>
 
-@for (challenge of challenges; track challenge.id) {
-    <ion-card class="challenge-card" (click)="goChallengeDetails(challenge.id)">
-      <ion-item lines="none">
-        <ion-thumbnail slot="start">
-          <img [src]="challenge.image" alt="{{ challenge.title }}" />
-        </ion-thumbnail>
-        <ion-label>
-          <h2 class="title">{{ challenge.title }}</h2>
-          <p class="description">{{ challenge.description }}</p>
-        </ion-label>
-        
-      </ion-item>
-<div class="points-tag">{{ challenge.score }} pts</div>
-      <ion-button
-        expand="block"
-        [ngClass]="challenge.status + '-button'"
-        (click)="challenge.status === 'participate' ? participateChallenge(challenge.id) : seeMoreChallenge(challenge.id)"
+    <!-- Desafios diários -->
+    <div class="daily-challenges-section">
+      <h3 class="section-title">Desafios do Dia</h3>
+      <p class="section-subtitle">Escolha 1 desafio para realizar hoje</p>
+
+      <div class="challenges-grid" *ngIf="dailyChallenges.length > 0">
+        <ion-card
+          class="challenge-card"
+          *ngFor="let challenge of dailyChallenges; let i = index"
+          [class.completed]="isChallengeCompleted(challenge)"
+          [class.in-progress]="isChallengeInProgress(challenge)"
+          [class.disabled]="isChallengeDisabled(challenge)"
+          (click)="handleChallengeClick(challenge)"
+        >
+          <div class="challenge-image-container">
+            <img
+              [src]="challenge.imageBanner || challenge.image || 'assets/images/default-challenge.png'"
+              [alt]="challenge.title"
+              class="challenge-image"
+            />
+            <div
+              class="challenge-status-badge"
+              [ngClass]="getChallengeStatusClass(challenge)"
+            >
+              <ion-icon [name]="getChallengeStatusIcon(challenge)"></ion-icon>
+            </div>
+          </div>
+
+          <ion-card-header>
+            <ion-card-title class="challenge-title"
+              >{{ challenge.title }}</ion-card-title
+            >
+          </ion-card-header>
+
+          <ion-card-content>
+            <p class="challenge-description">{{ challenge.description }}</p>
+
+            <div class="challenge-footer">
+              <div class="points-reward">
+                <ion-icon name="star-outline"></ion-icon>
+                <span>{{ challenge.score || 0 }} pts</span>
+              </div>
+
+              <ion-button
+                [fill]="getChallengeButtonFill(challenge)"
+                [color]="getChallengeButtonColor(challenge)"
+                size="small"
+                class="challenge-action-btn"
+                [disabled]="isChallengeDisabled(challenge)"
+                (click)="handleChallengeAction(challenge, $event)"
+              >
+                <ion-icon
+                  [name]="getChallengeButtonIcon(challenge)"
+                  slot="start"
+                ></ion-icon>
+                {{ getChallengeButtonText(challenge) }}
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Estado de carregamento -->
+      <div *ngIf="loadingChallenges" class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Carregando desafios do dia...</p>
+      </div>
+
+      <!-- Estado vazio -->
+      <div
+        *ngIf="!loadingChallenges && dailyChallenges.length === 0"
+        class="empty-state"
       >
-        {{ getButtonText(challenge) }}
-      </ion-button>
-    </ion-card>
-  }
+        <div class="empty-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <h4>Nenhum desafio disponível hoje</h4>
+        <p>Volte amanhã para novos desafios!</p>
+      </div>
+    </div>
+
+    <!-- Desafios em andamento -->
+    <div
+      class="ongoing-challenges-section"
+      *ngIf="ongoingChallenges.length > 0"
+    >
+      <h3 class="section-title">Desafios em Andamento</h3>
+
+      <ion-card
+        class="ongoing-challenge-card"
+        *ngFor="let challenge of ongoingChallenges"
+        (click)="goToChallengeDetails(challenge.id)"
+      >
+        <div class="ongoing-challenge-content">
+          <img
+            [src]="challenge.image || 'assets/images/default-challenge.png'"
+            [alt]="challenge.title"
+            class="ongoing-challenge-image"
+          />
+          <div class="ongoing-challenge-info">
+            <h4>{{ challenge.title }}</h4>
+            <p>{{ challenge.description }}</p>
+            <div class="ongoing-challenge-meta">
+              <span class="points">{{ challenge.score || 0 }} pts</span>
+              <ion-chip color="warning" outline>
+                <ion-icon name="time-outline"></ion-icon>
+                <ion-label>Em andamento</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <ion-button
+            fill="outline"
+            color="primary"
+            size="small"
+            (click)="goToChallengeDetails(challenge.id); $event.stopPropagation()"
+          >
+            Ver mais
+          </ion-button>
+        </div>
+      </ion-card>
+    </div>
   </div>
 </ion-content>

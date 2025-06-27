@@ -4,10 +4,11 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://reconnect-latest.onrender.com/api',
+  apiUrl: 'https://reconnect-latest.onrender.com/api', // URL da API local,
 };
 
 /*
+
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
  *

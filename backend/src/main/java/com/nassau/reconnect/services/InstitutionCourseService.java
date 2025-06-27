@@ -2,10 +2,16 @@ package com.nassau.reconnect.services;
 
 import com.nassau.reconnect.dtos.instituition.InstitutionCourseCreateDto;
 import com.nassau.reconnect.dtos.instituition.InstitutionCourseDto;
+import com.nassau.reconnect.dtos.instituition.InstitutionMaterialDto;
+import com.nassau.reconnect.dtos.instituition.InstitutionVideoDto;
+import com.nassau.reconnect.dtos.instituition.InstitutionQuestionDto;
 import com.nassau.reconnect.exceptions.ResourceNotFoundException;
 import com.nassau.reconnect.mappers.InstitutionCourseMapper;
 import com.nassau.reconnect.models.Institution;
 import com.nassau.reconnect.models.InstitutionCourse;
+import com.nassau.reconnect.models.InstitutionMaterial;
+import com.nassau.reconnect.models.InstitutionVideo;
+import com.nassau.reconnect.models.InstitutionQuestion;
 import com.nassau.reconnect.models.User;
 import com.nassau.reconnect.models.enums.CourseStatus;
 import com.nassau.reconnect.repositories.InstitutionCourseRepository;
@@ -22,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -74,7 +81,8 @@ public class InstitutionCourseService {
 
         // Set institution
         Institution institution = institutionRepository.findById(courseCreateDto.getInstitutionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Institution not found with id: " + courseCreateDto.getInstitutionId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Institution not found with id: " + courseCreateDto.getInstitutionId()));
         course.setInstitution(institution);
 
         // Set default settings if not provided
@@ -82,8 +90,45 @@ public class InstitutionCourseService {
             course.setSettings(new InstitutionCourse.CourseSettings(true, false, 100));
         }
 
+        // Clear any existing content to start fresh
+        course.getMaterials().clear();
+        course.getVideos().clear();
+        course.getQuestions().clear();
+
+        // Save course first to get ID
         InstitutionCourse savedCourse = institutionCourseRepository.save(course);
-        return institutionCourseMapper.toDto(savedCourse);
+
+        // Process and save materials, videos, and questions if provided
+        if (courseCreateDto.getMaterials() != null && !courseCreateDto.getMaterials().isEmpty()) {
+            for (InstitutionMaterialDto materialDto : courseCreateDto.getMaterials()) {
+                if (materialDto != null) {
+                    InstitutionMaterial material = createMaterialFromDto(materialDto, savedCourse);
+                    savedCourse.addMaterial(material);
+                }
+            }
+        }
+
+        if (courseCreateDto.getVideos() != null && !courseCreateDto.getVideos().isEmpty()) {
+            for (InstitutionVideoDto videoDto : courseCreateDto.getVideos()) {
+                if (videoDto != null) {
+                    InstitutionVideo video = createVideoFromDto(videoDto, savedCourse);
+                    savedCourse.addVideo(video);
+                }
+            }
+        }
+
+        if (courseCreateDto.getQuestions() != null && !courseCreateDto.getQuestions().isEmpty()) {
+            for (InstitutionQuestionDto questionDto : courseCreateDto.getQuestions()) {
+                if (questionDto != null) {
+                    InstitutionQuestion question = createQuestionFromDto(questionDto, savedCourse);
+                    savedCourse.addQuestion(question);
+                }
+            }
+        }
+
+        // Save course again with all content
+        InstitutionCourse finalSavedCourse = institutionCourseRepository.save(savedCourse);
+        return institutionCourseMapper.toDto(finalSavedCourse);
     }
 
     @Transactional
@@ -102,9 +147,38 @@ public class InstitutionCourseService {
             InstitutionCourse.CourseSettings settings = new InstitutionCourse.CourseSettings(
                     courseUpdateDto.getSettings().isAllowEnrollment(),
                     courseUpdateDto.getSettings().isRequireApproval(),
-                    courseUpdateDto.getSettings().getMaxStudents()
-            );
+                    courseUpdateDto.getSettings().getMaxStudents());
             course.setSettings(settings);
+        }
+
+        // Update materials if provided
+        if (courseUpdateDto.getMaterials() != null) {
+            course.getMaterials().clear();
+            courseUpdateDto.getMaterials().forEach(materialDto -> {
+                if (materialDto != null) {
+                    course.getMaterials().add(createMaterialFromDto(materialDto, course));
+                }
+            });
+        }
+
+        // Update videos if provided
+        if (courseUpdateDto.getVideos() != null) {
+            course.getVideos().clear();
+            courseUpdateDto.getVideos().forEach(videoDto -> {
+                if (videoDto != null) {
+                    course.getVideos().add(createVideoFromDto(videoDto, course));
+                }
+            });
+        }
+
+        // Update questions if provided
+        if (courseUpdateDto.getQuestions() != null) {
+            course.getQuestions().clear();
+            courseUpdateDto.getQuestions().forEach(questionDto -> {
+                if (questionDto != null) {
+                    course.getQuestions().add(createQuestionFromDto(questionDto, course));
+                }
+            });
         }
 
         InstitutionCourse updatedCourse = institutionCourseRepository.save(course);
@@ -176,5 +250,190 @@ public class InstitutionCourseService {
         institutionCourseRepository.save(course);
 
         return true;
+    }
+
+    // Helper methods for creating entities from DTOs
+    private InstitutionMaterial createMaterialFromDto(InstitutionMaterialDto dto, InstitutionCourse course) {
+        InstitutionMaterial material = new InstitutionMaterial();
+        // Course will be set by the addMaterial method
+        material.setTitle(dto.getTitle());
+        material.setDescription(dto.getDescription());
+        material.setFilename(dto.getFilename());
+        material.setType(dto.getType());
+        material.setSize(dto.getSize());
+        material.setUploadedAt(LocalDateTime.now());
+        material.setUpdatedAt(LocalDateTime.now());
+        return material;
+    }
+
+    private InstitutionVideo createVideoFromDto(InstitutionVideoDto dto, InstitutionCourse course) {
+        InstitutionVideo video = new InstitutionVideo();
+        // Course will be set by the addVideo method
+        video.setTitle(dto.getTitle());
+        video.setDescription(dto.getDescription());
+        video.setFilename(dto.getFilename());
+        video.setDuration(dto.getDuration());
+        video.setThumbnail(dto.getThumbnail());
+        video.setUrl(dto.getUrl());
+        video.setUploadedAt(LocalDateTime.now());
+        video.setUpdatedAt(LocalDateTime.now());
+        return video;
+    }
+
+    private InstitutionQuestion createQuestionFromDto(InstitutionQuestionDto dto, InstitutionCourse course) {
+        InstitutionQuestion question = new InstitutionQuestion();
+        // Course will be set by the addQuestion method
+        question.setQuestion(dto.getQuestion());
+        question.setAlternatives(dto.getAlternatives());
+        question.setCorrectAnswer(dto.getCorrectAnswer());
+        question.setCreatedAt(LocalDateTime.now());
+        question.setUpdatedAt(LocalDateTime.now());
+        return question;
+    }
+
+    // Methods for managing individual content items
+    @Transactional
+    public InstitutionCourseDto addVideoToCourse(Long courseId, InstitutionVideoDto videoDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionVideo video = createVideoFromDto(videoDto, course);
+        course.getVideos().add(video);
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto updateCourseVideo(Long courseId, Long videoId, InstitutionVideoDto videoDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionVideo video = course.getVideos().stream()
+                .filter(v -> v.getId().equals(videoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Video not found with id: " + videoId));
+
+        // Update video fields
+        video.setTitle(videoDto.getTitle());
+        video.setDescription(videoDto.getDescription());
+        video.setFilename(videoDto.getFilename());
+        video.setDuration(videoDto.getDuration());
+        video.setThumbnail(videoDto.getThumbnail());
+        video.setUrl(videoDto.getUrl());
+        video.setUpdatedAt(LocalDateTime.now());
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto removeVideoFromCourse(Long courseId, Long videoId) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        boolean removed = course.getVideos().removeIf(v -> v.getId().equals(videoId));
+        if (!removed) {
+            throw new ResourceNotFoundException("Video not found with id: " + videoId);
+        }
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto addMaterialToCourse(Long courseId, InstitutionMaterialDto materialDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionMaterial material = createMaterialFromDto(materialDto, course);
+        course.getMaterials().add(material);
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto updateCourseMaterial(Long courseId, Long materialId,
+            InstitutionMaterialDto materialDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionMaterial material = course.getMaterials().stream()
+                .filter(m -> m.getId().equals(materialId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Material not found with id: " + materialId));
+
+        // Update material fields
+        material.setTitle(materialDto.getTitle());
+        material.setDescription(materialDto.getDescription());
+        material.setFilename(materialDto.getFilename());
+        material.setType(materialDto.getType());
+        material.setSize(materialDto.getSize());
+        material.setUpdatedAt(LocalDateTime.now());
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto removeMaterialFromCourse(Long courseId, Long materialId) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        boolean removed = course.getMaterials().removeIf(m -> m.getId().equals(materialId));
+        if (!removed) {
+            throw new ResourceNotFoundException("Material not found with id: " + materialId);
+        }
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto addQuestionToCourse(Long courseId, InstitutionQuestionDto questionDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionQuestion question = createQuestionFromDto(questionDto, course);
+        course.getQuestions().add(question);
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto updateCourseQuestion(Long courseId, Long questionId,
+            InstitutionQuestionDto questionDto) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        InstitutionQuestion question = course.getQuestions().stream()
+                .filter(q -> q.getId().equals(questionId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
+
+        // Update question fields
+        question.setQuestion(questionDto.getQuestion());
+        question.setAlternatives(questionDto.getAlternatives());
+        question.setCorrectAnswer(questionDto.getCorrectAnswer());
+        question.setUpdatedAt(LocalDateTime.now());
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
+    }
+
+    @Transactional
+    public InstitutionCourseDto removeQuestionFromCourse(Long courseId, Long questionId) {
+        InstitutionCourse course = institutionCourseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Institution course not found with id: " + courseId));
+
+        boolean removed = course.getQuestions().removeIf(q -> q.getId().equals(questionId));
+        if (!removed) {
+            throw new ResourceNotFoundException("Question not found with id: " + questionId);
+        }
+
+        InstitutionCourse savedCourse = institutionCourseRepository.save(course);
+        return institutionCourseMapper.toDto(savedCourse);
     }
 }

@@ -1,0 +1,171 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/courses"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Editar' : 'Criar' }} Curso</ion-title>
+    <ion-buttons slot="end" *ngIf="isEditMode">
+      <ion-button color="danger" (click)="deleteCourse()">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="edit-course-page">
+  <div class="container">
+    <!-- Abas de navegação -->
+    <ion-segment [(ngModel)]="selectedTab" class="course-tabs">
+      <ion-segment-button value="info">
+        <ion-label>Informações</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="videos">
+        <ion-label>Vídeos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="materials">
+        <ion-label>Materiais</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+      <!-- Aba de Informações -->
+      <div *ngIf="selectedTab === 'info'" class="tab-content">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Informações Básicas</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label position="stacked">Nome do Curso *</ion-label>
+              <ion-input
+                formControlName="name"
+                placeholder="Digite o nome do curso"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Descrição *</ion-label>
+              <ion-textarea
+                formControlName="description"
+                rows="4"
+                placeholder="Descreva o curso"
+              ></ion-textarea>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">URL da Imagem</ion-label>
+              <ion-input
+                formControlName="image"
+                placeholder="URL da imagem do curso"
+              ></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Aba de Vídeos -->
+      <div *ngIf="selectedTab === 'videos'" class="tab-content">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              Vídeos do Curso
+              <ion-button fill="clear" (click)="addVideo()">
+                <ion-icon name="add-circle-outline"></ion-icon>
+              </ion-button>
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div formArrayName="videos">
+              <div
+                *ngFor="let video of videosArray.controls; let i = index"
+                [formGroupName]="i"
+                class="video-item"
+              >
+                <ion-item>
+                  <ion-label position="stacked">Título do Vídeo *</ion-label>
+                  <ion-input formControlName="title"></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="stacked">URL do Vídeo *</ion-label>
+                  <ion-input formControlName="url"></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="stacked">Descrição</ion-label>
+                  <ion-textarea formControlName="description"></ion-textarea>
+                </ion-item>
+
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="removeVideo(i)"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                  Remover
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Aba de Materiais -->
+      <div *ngIf="selectedTab === 'materials'" class="tab-content">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              Materiais do Curso
+              <ion-button fill="clear" (click)="addMaterial()">
+                <ion-icon name="add-circle-outline"></ion-icon>
+              </ion-button>
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div formArrayName="materials">
+              <div
+                *ngFor="let material of materialsArray.controls; let i = index"
+                [formGroupName]="i"
+                class="material-item"
+              >
+                <ion-item>
+                  <ion-label position="stacked">Título do Material *</ion-label>
+                  <ion-input formControlName="title"></ion-input>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="stacked">Descrição *</ion-label>
+                  <ion-textarea formControlName="description"></ion-textarea>
+                </ion-item>
+
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  (click)="removeMaterial(i)"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                  Remover
+                </ion-button>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </form>
+
+    <!-- Botão de salvar fixo -->
+    <div class="save-button-container">
+      <ion-button
+        expand="block"
+        (click)="saveCourse()"
+        [disabled]="courseForm.invalid || isLoading"
+        color="primary"
+      >
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading"
+          >{{ isEditMode ? 'Atualizar' : 'Criar' }} Curso</span
+        >
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

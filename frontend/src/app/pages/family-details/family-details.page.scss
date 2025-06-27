@@ -1,33 +1,39 @@
 .family-details-page {
+  --background: var(--soft-gray);
+
   .container {
     padding: 16px;
   }
 
   .green-text {
-    color: #2e7d63;
+    color: var(--primary-green);
     font-weight: 600;
   }
 
   .icon-end {
     font-size: 24px;
-    color: #2e7d63;
+    color: var(--primary-green);
   }
 
   .post-card {
     background: white;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--light-gray);
 
     .challenge-indicators {
       display: flex;
       gap: 8px;
-      margin: 12px 0;
+      margin: 16px 0;
       flex-wrap: wrap;
 
       .challenge-chip {
-        height: 28px;
+        height: 32px;
+        --background: var(--accent-orange);
+        --color: white;
+        font-weight: 500;
 
         ion-icon {
           margin-right: 4px;
@@ -35,14 +41,20 @@
       }
 
       .validated-chip {
+        --background: var(--success-green);
+        --color: white;
+
         ion-icon {
           color: white;
         }
       }
 
       .pending-chip {
+        --background: var(--soft-gray);
+        --color: var(--text-dark);
+
         ion-icon {
-          color: #333;
+          color: var(--text-dark);
         }
       }
     }
@@ -51,34 +63,45 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--soft-background);
 
       .likes {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
 
         ion-icon {
-          font-size: 1.2rem;
-          color: #666;
+          font-size: 1.4rem;
+          color: var(--text-medium);
 
           &.liked {
-            color: var(--ion-color-danger);
+            color: var(--accent-orange);
           }
         }
 
         span {
-          color: #666;
-          font-size: 0.9rem;
+          color: var(--text-medium);
+          font-size: 0.95rem;
+          font-weight: 500;
         }
       }
 
       ion-button {
-        --border-radius: 20px;
-        --padding-start: 12px;
-        --padding-end: 12px;
-        height: 32px;
-        font-size: 0.85rem;
+        --border-radius: 24px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+        --border-color: var(--success-green);
+        --color: var(--success-green);
+        height: 36px;
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        &:hover {
+          --background: var(--success-green);
+          --color: white;
+        }
       }
     }
   }
@@ -86,38 +109,62 @@
   .user-info {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
+    gap: 16px;
+    margin-bottom: 12px;
 
     ion-avatar {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
+      border: 2px solid var(--soft-background);
     }
 
     .name-time {
       h3 {
         font-size: 16px;
         margin: 0;
+        color: var(--text-dark);
+        font-weight: 600;
       }
 
       small {
-        font-size: 12px;
-        color: #666;
+        font-size: 13px;
+        color: var(--text-medium);
       }
     }
   }
 
   .caption {
-    margin: 8px 0;
-    font-size: 14px;
-    color: #333;
+    margin: 12px 0;
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.5;
   }
 
   .post-image {
     width: 100%;
     border-radius: 12px;
-    margin-bottom: 8px;
+    margin: 16px 0;
     object-fit: cover;
+    max-height: 400px;
+    border: 1px solid var(--soft-background);
+  }
+
+  .no-posts {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-medium);
+
+    p {
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
   }
 
   @media (min-width: 768px) {

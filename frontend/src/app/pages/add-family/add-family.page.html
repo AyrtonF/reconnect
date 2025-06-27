@@ -12,7 +12,9 @@
     <div class="header-section">
       <ion-icon name="people-outline" class="main-icon"></ion-icon>
       <h2>Crie sua Família</h2>
-      <p>Una-se aos seus entes queridos e participem juntos dos desafios!</p>
+      <p>
+        Una-se aos seus entes queridos e compartilhem momentos especiais juntos!
+      </p>
     </div>
 
     <form (ngSubmit)="createFamily()" #familyForm="ngForm">
@@ -45,6 +47,11 @@
             [disabled]="familyForm.invalid || isLoading"
           >
             <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <ion-icon
+              *ngIf="!isLoading"
+              name="add-circle-outline"
+              slot="start"
+            ></ion-icon>
             <span *ngIf="!isLoading">Criar Família</span>
           </ion-button>
         </ion-card-content>
@@ -58,7 +65,20 @@
 
     <ion-card class="join-card">
       <ion-card-content>
-        <h3>Participar de uma Família</h3>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+          "
+        >
+          <ion-icon
+            name="search-outline"
+            style="font-size: 1.5rem; color: var(--primary-green)"
+          ></ion-icon>
+          <h3>Participar de uma Família</h3>
+        </div>
         <p>Procure por uma família existente e solicite para participar</p>
 
         <ion-item lines="none" class="search-item">
@@ -93,6 +113,11 @@
                 name="crescent"
                 size="small"
               ></ion-spinner>
+              <ion-icon
+                *ngIf="!isJoining"
+                name="person-add-outline"
+                slot="start"
+              ></ion-icon>
               <span *ngIf="!isJoining">Participar</span>
             </ion-button>
           </div>

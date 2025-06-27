@@ -21,9 +21,6 @@ public interface InstitutionCourseMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "institution", ignore = true)
-    @Mapping(target = "materials", ignore = true)
-    @Mapping(target = "videos", ignore = true)
-    @Mapping(target = "questions", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "studentsEnrolled", ignore = true)
@@ -31,7 +28,8 @@ public interface InstitutionCourseMapper {
     InstitutionCourse toEntity(InstitutionCourseCreateDto courseCreateDto);
 
     default List<Long> getStudentsEnrolledIds(InstitutionCourse course) {
-        if (course.getStudentsEnrolled() == null) return null;
+        if (course.getStudentsEnrolled() == null)
+            return null;
         return course.getStudentsEnrolled().stream()
                 .map(student -> student.getId())
                 .collect(Collectors.toList());

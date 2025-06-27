@@ -77,27 +77,57 @@ export class HomePage implements OnInit {
 
   loadInProgressCourses() {
     const userId = this.authService.getUserId();
+    console.log('HomePage.loadInProgressCourses - Iniciando carregamento:', {
+      userId,
+      hasToken: !!this.authService.getToken(),
+    });
+
     if (!userId) {
+      console.error('HomePage.loadInProgressCourses - UserId não encontrado');
       return;
     }
 
     this.courseService.getEnrolledCourses(userId).subscribe({
       next: (courses) => {
+        console.log(
+          'HomePage.loadInProgressCourses - Cursos matriculados recebidos:',
+          courses
+        );
         // Todos os cursos matriculados são considerados "em progresso"
         this.inProgressCourses = courses;
       },
       error: (error) => {
-        console.error('Erro ao carregar cursos matriculados:', error);
+        console.error(
+          'HomePage.loadInProgressCourses - Erro ao carregar cursos matriculados:',
+          {
+            error,
+            status: error.status,
+            statusText: error.statusText,
+            errorBody: error.error,
+          }
+        );
         // Fallback para método antigo se o endpoint não existir
+        console.log('HomePage.loadInProgressCourses - Tentando fallback...');
         this.courseService.getAllCourses().subscribe({
           next: (allCourses) => {
+            console.log(
+              'HomePage.loadInProgressCourses - Fallback - Todos os cursos:',
+              allCourses
+            );
             this.inProgressCourses = allCourses.filter(
               (course) =>
                 course.isEnrolled && course.progress?.status !== 'completed'
             );
+            console.log(
+              'HomePage.loadInProgressCourses - Fallback - Cursos filtrados:',
+              this.inProgressCourses
+            );
           },
           error: (fallbackError) => {
-            console.error('Erro ao carregar cursos (fallback):', fallbackError);
+            console.error(
+              'HomePage.loadInProgressCourses - Erro ao carregar cursos (fallback):',
+              fallbackError
+            );
           },
         });
       },

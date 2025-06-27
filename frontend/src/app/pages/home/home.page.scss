@@ -1,182 +1,318 @@
 .home-page {
+  --ion-background-color: #ffffff;
+
   .logo {
- 
-    margin: 2em 2em 0;
+    max-height: 40px;
+    margin: 0;
   }
 
   .container {
-    padding: 16px;
+    padding: 20px;
 
     h2 {
       font-size: 1.5rem;
-      font-weight: 600;
-      margin-top: 12px;
+      font-weight: 700;
+      margin: 20px 0 16px 0;
+      color: #333;
+
+      .green-text {
+        color: var(--reconnect-green-primary);
+      }
     }
 
-    .green-text {
-      color: var(--ion-color-primary);
-    }
+    // Informações da família
+    .family-info {
+      background: var(--reconnect-light-green);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
 
-    .grid-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 20px;
-      .action-card {
+      .family-text {
+        margin: 0;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        background-color: var(--ion-color-primary);
-        height: 100px;
-        color: var(--ion-color-secondary);
-        text-align: center;
+        gap: 8px;
+        color: var(--reconnect-green-primary);
+        font-weight: 500;
+
         ion-icon {
-          font-size: 28px;
-          margin-bottom: 6px;
+          font-size: 20px;
         }
-        p {
-          font-size: 14px;
-          font-weight: 500;
-          margin: 0;
-        }
-        span {
+
+        .no-family {
+          color: #666;
           font-weight: 400;
         }
       }
     }
 
-    .section-title {
-      margin-top: 32px;
-      font-weight: 600;
-      font-size: 1.1rem;
+    // Grid de ações
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+
+      .action-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: linear-gradient(
+          135deg,
+          var(--reconnect-green-primary) 0%,
+          var(--reconnect-green-secondary) 100%
+        );
+        height: 100px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(69, 142, 119, 0.3);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(69, 142, 119, 0.4);
+        }
+
+        ion-icon {
+          font-size: 32px;
+          margin-bottom: 8px;
+        }
+
+        p {
+          font-size: 14px;
+          font-weight: 600;
+          margin: 0;
+          line-height: 1.2;
+
+          span {
+            font-weight: 400;
+          }
+        }
+      }
     }
 
-    .course-card {
-      border-radius: 12px;
-      overflow: hidden;
-      img {
-        width: 100%;
-        object-fit: cover;
-        max-height: 140px;
-      }
+    // Seção de cursos
+    .courses-section {
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
-      .orange-text {
-        color: #ec8e3c;
-        font-size: 1rem;
-        font-weight: 600;
-      }
-
-      .description {
-        font-size: 14px;
-        color: #444;
-        margin-top: 8px;
-      }
-
-      .progress-section {
-        margin-top: 12px;
-
-        .progress-text {
-          display: flex;
-          justify-content: space-between;
-          font-size: 12px;
-          margin-bottom: 4px;
-        }
-
-        ion-progress-bar {
-          height: 8px;
-          border-radius: 6px;
+        &:before {
+          content: "";
+          width: 4px;
+          height: 24px;
+          background: var(--reconnect-orange);
+          border-radius: 2px;
         }
       }
 
-      .access-button {
-        margin-top: 12px;
-        border-radius: 8px;
-        font-weight: 600;
+      .course-card {
+        margin: 0 0 20px 0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .course-image-container {
+          position: relative;
+          height: 180px;
+          overflow: hidden;
+
+          .course-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .course-progress-overlay {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+
+            .progress-percentage {
+              margin: 0;
+            }
+          }
+        }
+
+        ion-card-header {
+          padding: 16px 16px 8px 16px;
+
+          .course-title {
+            color: var(--reconnect-orange);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.3;
+          }
+        }
+
+        ion-card-content {
+          padding: 0 16px 16px 16px;
+
+          .course-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0 0 16px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .progress-section {
+            margin-bottom: 16px;
+
+            .progress-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 8px;
+              font-size: 12px;
+
+              .progress-text {
+                color: #666;
+                font-weight: 500;
+              }
+
+              .points-text {
+                color: var(--reconnect-orange);
+                font-weight: 600;
+              }
+            }
+
+            .course-progress-bar {
+              height: 8px;
+              border-radius: 4px;
+              --progress-background: var(--reconnect-orange);
+
+              &::part(track) {
+                background: var(--reconnect-gray-light);
+              }
+            }
+          }
+
+          .access-button {
+            --background: var(--reconnect-green-primary);
+            --background-hover: var(--reconnect-green-secondary);
+            --color: white;
+            margin: 0;
+            height: 48px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(69, 142, 119, 0.3);
+
+            ion-icon {
+              margin-right: 8px;
+            }
+          }
+        }
+      }
+
+      // Estado vazio
+      .no-courses {
+        text-align: center;
+        padding: 40px 20px;
+        background: var(--reconnect-light-green);
+        border-radius: 16px;
+        margin-top: 20px;
+
+        .no-courses-icon {
+          margin-bottom: 16px;
+
+          ion-icon {
+            font-size: 64px;
+            color: var(--reconnect-green-primary);
+            opacity: 0.6;
+          }
+        }
+
+        h4 {
+          color: var(--reconnect-green-primary);
+          font-weight: 700;
+          margin: 0 0 8px 0;
+          font-size: 1.1rem;
+        }
+
+        p {
+          color: #666;
+          margin: 0 0 24px 0;
+          font-size: 14px;
+          line-height: 1.4;
+        }
+
+        .explore-button {
+          --background: var(--reconnect-orange);
+          --color: white;
+          height: 48px;
+          font-weight: 600;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(232, 154, 67, 0.3);
+
+          ion-icon {
+            margin-right: 8px;
+          }
+        }
       }
     }
   }
 
+  // Responsivo
   @media (min-width: 768px) {
     .container {
-      max-width: 600px;
-      margin: auto;
-    }
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px;
 
-    .grid-buttons {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-}
-// ... estilos anteriores permanecem iguais ...
+      .grid-buttons {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
 
-.course-card {
-  margin: 1rem;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .action-card {
+          height: 120px;
 
-  img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-  }
+          ion-icon {
+            font-size: 36px;
+          }
 
-  ion-card-header {
-    padding: 1rem;
-
-    .orange-text {
-      color: #F5A442;
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-  }
-
-  ion-card-content {
-    padding: 0 1rem 1rem;
-
-    .description {
-      color: var(--ion-color-medium);
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .progress-section {
-      margin: 1rem 0;
-
-      .progress-text {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-        color: var(--ion-color-medium);
+          p {
+            font-size: 15px;
+          }
+        }
       }
 
-      ion-progress-bar {
-        --progress-background: #F5A442;
-        height: 8px;
-        border-radius: 4px;
+      .courses-section {
+        .course-card {
+          .course-image-container {
+            height: 200px;
+          }
+        }
       }
     }
-
-    .access-button {
-      --background: #F5A442;
-      --color: white;
-      margin-top: 1rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      height: 44px;
-    }
-  }
-}
-
-.no-courses {
-  text-align: center;
-  padding: 2rem;
-  
-  p {
-    color: var(--ion-color-medium);
-    margin-bottom: 1rem;
   }
 }

@@ -379,34 +379,47 @@ export class AddCourseInstitutionPage implements OnInit {
       });
       await loading.present();
 
-      // Converter para o formato correto
-      const courseToSave: Partial<InstitutionCourse> = {
-        institutionId: institutionId, // ✅ CORRIGIDO - usando a variável verificada (userId para ADMIN, institutionId para STAFF)
+      // Converter para o formato correto para criação (apenas campos necessários)
+      const courseToSave: any = {
+        institutionId: institutionId,
         name: this.courseData.name,
         description: this.courseData.description,
         image: this.courseData.image,
-        materials: this.courseData.materials?.map((m) => ({
-          ...m,
-          courseId: 0, // será atualizado pelo backend
-          type: 'document',
-          uploadedAt: new Date(),
-          updatedAt: new Date(),
-        })) as InstitutionMaterial[],
-        videos: this.courseData.videos?.map((v) => ({
-          ...v,
-          courseId: 0, // será atualizado pelo backend
-          uploadedAt: new Date(),
-          updatedAt: new Date(),
-        })) as InstitutionVideo[],
-        questions: this.courseData.questions?.map((q) => ({
-          ...q,
-          courseId: 0, // será atualizado pelo backend
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })) as InstitutionQuestion[],
-        status: 'published' as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        // Apenas incluir arrays se não estiverem vazios
+        ...(this.courseData.materials &&
+          this.courseData.materials.length > 0 && {
+            materials: this.courseData.materials.map((m) => ({
+              title: m.title,
+              description: m.description,
+              filename: m.filename,
+              type: 'document',
+              size: 0,
+            })),
+          }),
+        ...(this.courseData.videos &&
+          this.courseData.videos.length > 0 && {
+            videos: this.courseData.videos.map((v) => ({
+              title: v.title,
+              description: v.description,
+              filename: v.filename,
+              duration: 0,
+              thumbnail: '',
+              url: '',
+            })),
+          }),
+        ...(this.courseData.questions &&
+          this.courseData.questions.length > 0 && {
+            questions: this.courseData.questions.map((q) => ({
+              question: q.question,
+              alternatives: q.alternatives,
+              correctAnswer: q.correctAnswer,
+            })),
+          }),
+        settings: {
+          allowEnrollment: true,
+          requireApproval: false,
+          maxStudents: 100,
+        },
       };
 
       console.log('Dados do curso a serem salvos:', courseToSave);

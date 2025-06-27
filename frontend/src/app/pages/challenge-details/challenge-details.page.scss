@@ -4,46 +4,57 @@ ion-header {
 
     & ion-icon {
       font-size: 1.5rem;
-      color: var(--ion-color-primary);
+      color: var(--primary-green);
     }
   }
 
   .green-text {
-    color: #2e7d63;
+    color: var(--primary-green);
     text-align: center;
     font-size: 1.2rem;
-    font-weight: 500;
+    font-weight: 600;
   }
 }
 
 .challenge-details-page {
+  --background: var(--soft-background);
+
   .container {
-    padding: 16px;
+    padding: 20px;
   }
 
   .green-text {
-    color: #2e7d63;
+    color: var(--primary-green);
     text-align: center;
     font-size: 1.2rem;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .challenge-image {
     width: 100%;
+    border-radius: 16px;
+    margin-bottom: 20px;
   }
 
   .description-section,
   .participants-section {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 
     .label {
-      font-size: 15px;
-      margin-bottom: 4px;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: var(--primary-green);
+      font-weight: 600;
     }
 
     .description {
       font-size: 15px;
-      color: #444;
+      color: var(--text-dark);
+      line-height: 1.6;
     }
   }
 
@@ -55,22 +66,28 @@ ion-header {
     ion-avatar {
       width: 48px;
       height: 48px;
-      border: 2px solid #eee;
+      border: 2px solid var(--soft-background);
     }
   }
 
   .activity-photo {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 
     .label {
-      margin-bottom: 10px;
-      color: var(--ion-color-primary);
+      margin-bottom: 16px;
+      color: var(--primary-green);
+      font-weight: 600;
+      font-size: 16px;
     }
 
     .registered-photo {
       max-width: 100%;
-      max-height: 200px;
+      max-height: 250px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       object-fit: cover;
@@ -80,12 +97,25 @@ ion-header {
   .button-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    padding: 20px 0;
 
     ion-button {
       text-transform: none;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 16px;
+      height: 48px;
+      font-size: 16px;
+
+      &[color="primary"] {
+        --background: var(--accent-orange);
+        --color: white;
+      }
+
+      &[color="success"] {
+        --background: var(--success-green);
+        --color: white;
+      }
 
       &[disabled] {
         opacity: 0.5;

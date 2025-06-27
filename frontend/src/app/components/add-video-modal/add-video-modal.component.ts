@@ -1,13 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController } from '@ionic/angular';
+import {
+  IonicModule,
+  ModalController,
+  LoadingController,
+  ToastController,
+} from '@ionic/angular';
+import { CloudinaryService } from '../../services/cloudnary.service';
 
 interface VideoData {
   id: number;
   title: string;
   description: string;
   filename: string;
+  url?: string;
   file?: File;
 }
 
@@ -29,7 +36,12 @@ export class AddVideoModalComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private cloudinaryService: CloudinaryService,
+    private loadingController: LoadingController,
+    private toastController: ToastController
+  ) {}
 
   ngOnInit() {}
 
@@ -111,27 +123,49 @@ export class AddVideoModalComponent implements OnInit {
 
       this.isSubmitting = true;
 
-      // Aqui você pode adicionar a lógica para upload do arquivo
-      // Por exemplo, usando FormData para enviar para um servidor
+      // Verificar se as configurações do Cloudinary estão corretas
+      if (!this.cloudinaryService.validateConfig()) {
+        await this.showToast('Configurações do Cloudinary não encontradas');
+        return;
+      }
 
-      /*
-      const formData = new FormData();
-      formData.append('video', this.selectedFile);
-      formData.append('title', this.videoData.title);
-      formData.append('description', this.videoData.description);
-      
-      // Exemplo de upload:
-      // await this.uploadService.uploadVideo(formData);
-      */
+      const loading = await this.loadingController.create({
+        message: 'Enviando vídeo...',
+      });
+      await loading.present();
 
-      // Por enquanto, apenas retornamos os dados do vídeo
-      await this.modalCtrl.dismiss(this.videoData);
+      try {
+        // Upload do vídeo para o Cloudinary
+        const videoUrl = await this.cloudinaryService.uploadVideo(
+          this.selectedFile!
+        );
+        this.videoData.url = videoUrl;
+
+        await loading.dismiss();
+        await this.showToast('Vídeo enviado com sucesso!');
+
+        // Retornar os dados do vídeo com a URL
+        await this.modalCtrl.dismiss(this.videoData);
+      } catch (uploadError) {
+        await loading.dismiss();
+        console.error('Erro no upload do vídeo:', uploadError);
+        this.errorMessage = 'Erro ao enviar o vídeo. Tente novamente.';
+      }
     } catch (error) {
       console.error('Erro ao salvar vídeo:', error);
       this.errorMessage = 'Erro ao salvar o vídeo. Tente novamente.';
     } finally {
       this.isSubmitting = false;
     }
+  }
+
+  async showToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'bottom',
+    });
+    await toast.present();
   }
 
   cancel() {

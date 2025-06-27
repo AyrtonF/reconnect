@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, combineLatest, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import {
@@ -30,6 +30,15 @@ export class CourseService {
     private authService: AuthService
   ) {}
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    console.log('CourseService.getAuthHeaders - Token disponível:', !!token);
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+  }
+
   // Métodos para Student Courses
   getAllCourses(): Observable<Course[]> {
     return combineLatest([
@@ -40,7 +49,18 @@ export class CourseService {
         const convertedInstitutionalCourses: Course[] = institutionCourses.map(
           (instCourse) => this.convertInstitutionToStudentCourse(instCourse)
         );
-        return [...studentCourses, ...convertedInstitutionalCourses].sort(
+
+        // Garantir que todos os cursos tenham datas válidas antes da ordenação
+        const allCourses = [
+          ...studentCourses,
+          ...convertedInstitutionalCourses,
+        ].map((course) => ({
+          ...course,
+          createdAt: this.ensureDate(course.createdAt),
+          updatedAt: this.ensureDate(course.updatedAt),
+        }));
+
+        return allCourses.sort(
           (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
         );
       }),
@@ -49,10 +69,13 @@ export class CourseService {
   }
 
   getStudentCourses(): Observable<Course[]> {
-    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}`).pipe(
-      map((response) => response.data || []),
-      catchError(this.errorHandler.handleError)
-    );
+    const headers = this.getAuthHeaders();
+    return this.http
+      .get<ApiResponse<Course[]>>(`${this.apiUrl}`, { headers })
+      .pipe(
+        map((response) => response.data || []),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
   getInstitutionCourses(): Observable<InstitutionCourse[]> {
@@ -78,10 +101,13 @@ export class CourseService {
         );
     }
 
-    return this.http.get<ApiResponse<Course>>(`${this.apiUrl}/${id}`).pipe(
-      map((response) => response.data!),
-      catchError(this.errorHandler.handleError)
-    );
+    const headers = this.getAuthHeaders();
+    return this.http
+      .get<ApiResponse<Course>>(`${this.apiUrl}/${id}`, { headers })
+      .pipe(
+        map((response) => response.data!),
+        catchError(this.errorHandler.handleError)
+      );
   }
 
   getCoursesByCategory(category: string): Observable<Course[]> {
@@ -242,8 +268,6 @@ export class CourseService {
 
   // Método de conveniência para matrícula sem precisar passar userId
   enrollInCourseCurrentUser(courseId: number): Observable<boolean> {
-
-  
     const userId = this.authService.getUserId();
     if (!userId) {
       return throwError(() => new Error('User not authenticated'));
@@ -269,11 +293,23 @@ export class CourseService {
     return throwError(() => new Error('Method not implemented in backend yet'));
   }
 
+  // Função auxiliar para conversão segura de datas
+  private ensureDate(dateValue: any): Date {
+    if (!dateValue) return new Date();
+    if (dateValue instanceof Date) return dateValue;
+    if (typeof dateValue === 'string') return new Date(dateValue);
+    return new Date();
+  }
+
   // Método auxiliar para converter InstitutionCourse para Course
   private convertInstitutionToStudentCourse(
     instCourse: InstitutionCourse,
     overrideId?: number
   ): Course {
+    // Converter strings de data para objetos Date de forma segura
+    const createdAt = this.ensureDate(instCourse.createdAt);
+    const updatedAt = this.ensureDate(instCourse.updatedAt);
+
     return {
       id: overrideId || instCourse.id, // Usar ID real do curso institucional
       title: instCourse.name,
@@ -286,7 +322,7 @@ export class CourseService {
       level: 'beginner' as const,
       price: 0,
       isEnrolled: false,
-      enrollmentDate: instCourse.createdAt,
+      enrollmentDate: createdAt,
       modules: [], // Seria convertido se o backend fornecesse módulos estruturados
       progress: {
         completed: 0,
@@ -300,8 +336,8 @@ export class CourseService {
         total: 0,
         achievements: [],
       },
-      createdAt: instCourse.createdAt,
-      updatedAt: instCourse.updatedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       tags: [],
       prerequisites: [],
       // Adicionar propriedades para identificar como curso institucional
@@ -331,26 +367,60 @@ export class CourseService {
   // Método para obter cursos matriculados
   getEnrolledCourses(userId?: number): Observable<Course[]> {
     const userIdToUse = userId || this.authService.getUserId();
+    console.log(
+      'CourseService.getEnrolledCourses - Iniciando busca de cursos matriculados:',
+      {
+        userId: userIdToUse,
+        hasToken: !!this.authService.getToken(),
+      }
+    );
+
     if (!userIdToUse) {
+      console.error(
+        'CourseService.getEnrolledCourses - Usuário não autenticado'
+      );
       return throwError(() => new Error('User not authenticated'));
     }
 
-    // Tentar endpoint específico, com fallback para método alternativo
-    return this.http
-      .get<ApiResponse<Course[]>>(`${this.apiUrl}/user/${userIdToUse}/enrolled`)
-      .pipe(
-        map((response) => response.data || []),
-        catchError((error) => {
-          console.warn(
-            'Endpoint de cursos matriculados não disponível, usando fallback:',
-            error
-          );
-          // Fallback: obter todos os cursos e filtrar pelos matriculados
-          return this.getAllCourses().pipe(
-            map((courses) => courses.filter((course) => course.isEnrolled))
-          );
-        })
-      );
+    const url = `${environment.apiUrl}/users/${userIdToUse}/courses`;
+    const headers = this.getAuthHeaders();
+    console.log('CourseService.getEnrolledCourses - URL da requisição:', url);
+
+    // Usar o endpoint correto do backend
+    return this.http.get<ApiResponse<Course[]>>(url, { headers }).pipe(
+      map((response) => {
+        console.log(
+          'CourseService.getEnrolledCourses - Resposta recebida:',
+          response
+        );
+        return response.data || [];
+      }),
+      catchError((error) => {
+        console.error(
+          'CourseService.getEnrolledCourses - Erro na requisição:',
+          {
+            error,
+            status: error.status,
+            statusText: error.statusText,
+            errorBody: error.error,
+            url: error.url,
+          }
+        );
+        console.warn(
+          'Endpoint de cursos matriculados falhou, usando fallback:',
+          error
+        );
+        // Fallback: obter todos os cursos e filtrar pelos matriculados
+        return this.getAllCourses().pipe(
+          map((courses) => courses.filter((course) => course.isEnrolled)),
+          catchError(() => {
+            // Se tudo falhar, retornar array vazio
+            console.error('Falha total ao carregar cursos matriculados');
+            return [];
+          })
+        );
+      })
+    );
   }
 
   // Método para obter apenas cursos disponíveis (não matriculados)

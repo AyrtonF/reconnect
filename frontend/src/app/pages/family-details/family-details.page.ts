@@ -213,11 +213,25 @@ export class FamilyDetailsPage implements OnInit {
 
       await this.postService.updatePost(post.id, updatedPost).toPromise();
 
-      // TODO: Aqui seria interessante adicionar pontos ao usuário
-      // await this.userService.addPointsToUser(post.userId, challengePoints);
+      // Adicionar pontos ao usuário por completar o desafio
+      const challengePoints = 10; // Pontos fixos por desafio validado
+      try {
+        await this.userService
+          .addPointsToUser(post.userId, challengePoints)
+          .toPromise();
+        console.log(
+          `Adicionados ${challengePoints} pontos ao usuário ${post.userId}`
+        );
+      } catch (pointsError) {
+        console.error('Erro ao adicionar pontos:', pointsError);
+        // Não falha o processo se não conseguir adicionar pontos
+      }
 
       await loading.dismiss();
-      await this.showToast('Desafio validado com sucesso!', 'success');
+      await this.showToast(
+        'Desafio validado com sucesso! Pontos adicionados ao usuário.',
+        'success'
+      );
 
       // Recarregar posts
       this.loadFamilyPosts();

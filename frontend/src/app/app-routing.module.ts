@@ -159,11 +159,30 @@ const routes: Routes = [
         (m) => m.AddCouponPageModule
       ),
     canActivate: [AuthGuard],
-  },  {
-    path: 'add-family',
-    loadChildren: () => import('./pages/add-family/add-family.module').then( m => m.AddFamilyPageModule)
   },
-
+  {
+    path: 'add-family',
+    loadChildren: () =>
+      import('./pages/add-family/add-family.module').then(
+        (m) => m.AddFamilyPageModule
+      ),
+  },
+  {
+    path: 'edit-course',
+    loadChildren: () =>
+      import('./pages/edit-course/edit-course.module').then(
+        (m) => m.EditCoursePageModule
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'edit-course/:id',
+    loadChildren: () =>
+      import('./pages/edit-course/edit-course.module').then(
+        (m) => m.EditCoursePageModule
+      ),
+    canActivate: [AuthGuard],
+  },
 ];
 @NgModule({
   imports: [
